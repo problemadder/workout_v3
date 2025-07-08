@@ -16,6 +16,10 @@ function App() {
   const [exercises, setExercises] = useLocalStorage<Exercise[]>('abs-exercises', []);
   const [workouts, setWorkouts] = useLocalStorage<Workout[]>('abs-workouts', []);
   const [templates, setTemplates] = useLocalStorage<WorkoutTemplate[]>('abs-templates', []);
+  const [pendingWorkout, setPendingWorkout] = useState<{
+    sets: Array<{ exerciseId: string; reps: number }>;
+    notes: string;
+  } | null>(null);
 
   // Initialize default exercises if none exist
   useEffect(() => {
@@ -199,6 +203,38 @@ function App() {
     setActiveTab('workout');
   };
 
+  const handleTabChange = (newTab: string) => {
+    // If switching away from workout tab and there's pending workout data, auto-save it
+    if (activeTab === 'workout' && newTab !== 'workout' && pendingWorkout) {
+      if (pendingWorkout.sets.length > 0) {
+        const workout: Omit<Workout, 'id'> = {
+          date: new Date(),
+          sets: pendingWorkout.sets.map(set => ({
+            ...set,
+            id: crypto.randomUUID()
+          })),
+          notes: pendingWorkout.notes.trim() || undefined
+        };
+
+        const todaysWorkout = workouts.find(w => isToday(new Date(w.date)));
+        if (todaysWorkout) {
+          handleUpdateWorkout(todaysWorkout.id, workout);
+        } else {
+          handleSaveWorkout(workout);
+        }
+        
+        // Clear pending workout after saving
+        setPendingWorkout(null);
+      }
+    }
+    
+    setActiveTab(newTab);
+  };
+
+  const handleWorkoutDataChange = (sets: Array<{ exerciseId: string; reps: number }>, notes: string) => {
+    setPendingWorkout({ sets, notes });
+  };
+
   const handleImportExercises = (newExercises: Exercise[]) => {
     console.log('App.handleImportExercises called with:', newExercises);
     const updatedExercises = [...exercises, ...newExercises];
@@ -261,6 +297,7 @@ function App() {
             onSaveWorkout={handleSaveWorkout}
             onUpdateWorkout={handleUpdateWorkout}
             onAddTemplate={handleAddTemplate}
+            onWorkoutDataChange={handleWorkoutDataChange}
           />
         )}
         
@@ -282,7 +319,7 @@ function App() {
         )}
       </main>
 
-      <Navigation activeTab={activeTab} onTabChange={setActiveTab} />
+      <Navigation activeTab={activeTab} onTabChange={handleTabChange} />
     </div>
   );
 }

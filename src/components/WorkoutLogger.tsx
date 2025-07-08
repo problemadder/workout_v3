@@ -12,6 +12,7 @@ interface WorkoutLoggerProps {
   onSaveWorkout: (workout: Omit<Workout, 'id'>) => void;
   onUpdateWorkout: (id: string, workout: Omit<Workout, 'id'>) => void;
   onAddTemplate?: (template: Omit<WorkoutTemplate, 'id' | 'createdAt'>) => void;
+  onWorkoutDataChange?: (sets: Array<{ exerciseId: string; reps: number }>, notes: string) => void;
 }
 
 export function WorkoutLogger({ 
@@ -21,7 +22,8 @@ export function WorkoutLogger({
   templates,
   onSaveWorkout, 
   onUpdateWorkout,
-  onAddTemplate
+  onAddTemplate,
+  onWorkoutDataChange
 }: WorkoutLoggerProps) {
   const [sets, setSets] = useState<Omit<WorkoutSet, 'id'>[]>([]);
   const [notes, setNotes] = useState('');
@@ -62,6 +64,13 @@ export function WorkoutLogger({
       setSelectedExerciseId(sortedExercises[0].id);
     }
   }, [sortedExercises, selectedExerciseId]);
+
+  // Notify parent component when workout data changes (for autosave)
+  useEffect(() => {
+    if (onWorkoutDataChange) {
+      onWorkoutDataChange(sets, notes);
+    }
+  }, [sets, notes, onWorkoutDataChange]);
 
   const addExerciseWithSets = () => {
     if (!selectedExerciseId || numberOfSets < 1) return;
