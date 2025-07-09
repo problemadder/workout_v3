@@ -410,11 +410,6 @@ export function Targets({ targets, exercises, workouts, onAddTarget, onEditTarge
                             {categories.find(c => c.value === target.category)?.label}
                           </span>
                         )}
-                        {exercise && (
-                          <span className="text-xs px-2 py-1 rounded-full bg-solarized-base1/20 text-solarized-base01 border border-solarized-base1/30">
-                            {exercise.name}
-                          </span>
-                        )}
                       </div>
                     </div>
                     
