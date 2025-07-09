@@ -320,7 +320,7 @@ export function Targets({ targets, exercises, workouts, onAddTarget, onEditTarge
                   
                   return (
                     <optgroup key={category.value} label={category.label}>
-                      {categoryExercises.sort((a, b) => a.name.localeCompare(b.name)).map(exercise => (
+                      {categoryExercises.map(exercise => (
                         <option key={exercise.id} value={exercise.id}>
                           {exercise.name}
                         </option>
@@ -341,7 +341,7 @@ export function Targets({ targets, exercises, workouts, onAddTarget, onEditTarge
                 className="w-full p-3 border border-solarized-base1 rounded-lg focus:ring-2 focus:ring-solarized-blue focus:border-transparent bg-solarized-base3 text-solarized-base02"
               >
                 <option value="">All categories</option>
-                {categories.map(category => (
+                {categories.sort((a, b) => a.label.localeCompare(b.label)).map(category => (
                   <option key={category.value} value={category.value}>
                     {category.label}
                   </option>
