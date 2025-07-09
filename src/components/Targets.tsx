@@ -20,7 +20,7 @@ export function Targets({ targets, exercises, workouts, onAddTarget, onEditTarge
     category: '' as string,
     exerciseId: '',
     targetValue: 10,
-    period: 'weekly' as 'daily' | 'weekly' | 'monthly',
+    period: 'monthly' as 'monthly' | 'yearly',
     isActive: true
   });
 
@@ -64,7 +64,7 @@ export function Targets({ targets, exercises, workouts, onAddTarget, onEditTarge
       category: '',
       exerciseId: '',
       targetValue: 10,
-      period: 'weekly',
+      period: 'monthly',
       isActive: true
     });
     setShowForm(false);
@@ -91,7 +91,7 @@ export function Targets({ targets, exercises, workouts, onAddTarget, onEditTarge
       category: '',
       exerciseId: '',
       targetValue: 10,
-      period: 'weekly',
+      period: 'monthly',
       isActive: true
     });
     setEditingId(null);
@@ -103,18 +103,11 @@ export function Targets({ targets, exercises, workouts, onAddTarget, onEditTarge
     let startDate: Date;
     
     switch (target.period) {
-      case 'daily':
-        startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-        break;
-      case 'weekly':
-        const currentDay = now.getDay();
-        const mondayOffset = currentDay === 0 ? -6 : 1 - currentDay;
-        startDate = new Date(now);
-        startDate.setDate(now.getDate() + mondayOffset);
-        startDate.setHours(0, 0, 0, 0);
-        break;
       case 'monthly':
         startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+        break;
+      case 'yearly':
+        startDate = new Date(now.getFullYear(), 0, 1);
         break;
     }
 
@@ -223,9 +216,8 @@ export function Targets({ targets, exercises, workouts, onAddTarget, onEditTarge
                   className="w-full p-3 border border-solarized-base1 rounded-lg focus:ring-2 focus:ring-solarized-blue focus:border-transparent bg-solarized-base3 text-solarized-base02"
                   required
                 >
-                  <option value="daily">Daily</option>
-                  <option value="weekly">Weekly</option>
                   <option value="monthly">Monthly</option>
+                  <option value="yearly">Yearly</option>
                 </select>
               </div>
             </div>
@@ -246,11 +238,38 @@ export function Targets({ targets, exercises, workouts, onAddTarget, onEditTarge
 
             <div>
               <label className="block text-sm font-medium text-solarized-base01 mb-2">
+                Specific Exercise (optional)
+              </label>
+              <select
+                value={formData.exerciseId}
+                onChange={(e) => setFormData({ ...formData, exerciseId: e.target.value, category: e.target.value ? exercises.find(ex => ex.id === e.target.value)?.category || '' : formData.category })}
+                className="w-full p-3 border border-solarized-base1 rounded-lg focus:ring-2 focus:ring-solarized-blue focus:border-transparent bg-solarized-base3 text-solarized-base02"
+              >
+                <option value="">No specific exercise</option>
+                {categories.map(category => {
+                  const categoryExercises = sortedExercises.filter(ex => ex.category === category.value);
+                  if (categoryExercises.length === 0) return null;
+                  
+                  return (
+                    <optgroup key={category.value} label={category.label}>
+                      {categoryExercises.map(exercise => (
+                        <option key={exercise.id} value={exercise.id}>
+                          {exercise.name}
+                        </option>
+                      ))}
+                    </optgroup>
+                  );
+                })}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-solarized-base01 mb-2">
                 Category (optional)
               </label>
               <select
                 value={formData.category}
-                onChange={(e) => setFormData({ ...formData, category: e.target.value, exerciseId: '' })}
+                onChange={(e) => setFormData({ ...formData, category: e.target.value, exerciseId: formData.exerciseId && exercises.find(ex => ex.id === formData.exerciseId)?.category === e.target.value ? formData.exerciseId : '' })}
                 className="w-full p-3 border border-solarized-base1 rounded-lg focus:ring-2 focus:ring-solarized-blue focus:border-transparent bg-solarized-base3 text-solarized-base02"
               >
                 <option value="">All categories</option>
@@ -261,28 +280,6 @@ export function Targets({ targets, exercises, workouts, onAddTarget, onEditTarge
                 ))}
               </select>
             </div>
-
-            {formData.category && (
-              <div>
-                <label className="block text-sm font-medium text-solarized-base01 mb-2">
-                  Specific Exercise (optional)
-                </label>
-                <select
-                  value={formData.exerciseId}
-                  onChange={(e) => setFormData({ ...formData, exerciseId: e.target.value })}
-                  className="w-full p-3 border border-solarized-base1 rounded-lg focus:ring-2 focus:ring-solarized-blue focus:border-transparent bg-solarized-base3 text-solarized-base02"
-                >
-                  <option value="">All {categories.find(c => c.value === formData.category)?.label.toLowerCase()} exercises</option>
-                  {sortedExercises
-                    .filter(ex => ex.category === formData.category)
-                    .map(exercise => (
-                      <option key={exercise.id} value={exercise.id}>
-                        {exercise.name}
-                      </option>
-                    ))}
-                </select>
-              </div>
-            )}
 
             <div className="flex gap-3">
               <button
