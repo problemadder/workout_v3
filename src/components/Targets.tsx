@@ -20,20 +20,20 @@ export function Targets({ targets, exercises, workouts, onAddTarget, onEditTarge
     category: '' as string,
     exerciseId: '',
     targetValue: 10,
-    period: 'monthly' as 'monthly' | 'yearly',
+    period: 'monthly' as 'weekly' | 'monthly' | 'yearly',
     isActive: true
   });
 
   const categories = [
     { value: 'abs', label: 'Abs', color: 'bg-yellow-100 text-yellow-800 border-yellow-200' },
-    { value: 'legs', label: 'Legs', color: 'bg-green-100 text-green-800 border-green-200' },
     { value: 'arms', label: 'Arms', color: 'bg-blue-100 text-blue-800 border-blue-200' },
     { value: 'back', label: 'Back', color: 'bg-purple-100 text-purple-800 border-purple-200' },
-    { value: 'shoulders', label: 'Shoulders', color: 'bg-gray-100 text-gray-800 border-gray-200' },
-    { value: 'chest', label: 'Chest', color: 'bg-pink-100 text-pink-800 border-pink-200' },
     { value: 'cardio', label: 'Cardio', color: 'bg-red-100 text-red-800 border-red-200' },
-    { value: 'full-body', label: 'Full Body', color: 'bg-indigo-100 text-indigo-800 border-indigo-200' }
-  ];
+    { value: 'chest', label: 'Chest', color: 'bg-pink-100 text-pink-800 border-pink-200' },
+    { value: 'full-body', label: 'Full Body', color: 'bg-indigo-100 text-indigo-800 border-indigo-200' },
+    { value: 'legs', label: 'Legs', color: 'bg-green-100 text-green-800 border-green-200' },
+    { value: 'shoulders', label: 'Shoulders', color: 'bg-gray-100 text-gray-800 border-gray-200' }
+  ].sort((a, b) => a.label.localeCompare(b.label));
 
   const sortedExercises = [...exercises].sort((a, b) => a.name.localeCompare(b.name));
 
@@ -64,7 +64,7 @@ export function Targets({ targets, exercises, workouts, onAddTarget, onEditTarge
       category: '',
       exerciseId: '',
       targetValue: 10,
-      period: 'monthly',
+      period: 'weekly',
       isActive: true
     });
     setShowForm(false);
@@ -91,7 +91,7 @@ export function Targets({ targets, exercises, workouts, onAddTarget, onEditTarge
       category: '',
       exerciseId: '',
       targetValue: 10,
-      period: 'monthly',
+      period: 'weekly',
       isActive: true
     });
     setEditingId(null);
@@ -104,6 +104,17 @@ export function Targets({ targets, exercises, workouts, onAddTarget, onEditTarge
     let endDate: Date;
     
     switch (target.period) {
+      case 'weekly':
+        // Get Monday of current week
+        const currentDay = now.getDay(); // 0 = Sunday, 1 = Monday, etc.
+        const mondayOffset = currentDay === 0 ? -6 : 1 - currentDay;
+        startDate = new Date(now);
+        startDate.setDate(now.getDate() + mondayOffset);
+        startDate.setHours(0, 0, 0, 0);
+        endDate = new Date(startDate);
+        endDate.setDate(startDate.getDate() + 6);
+        endDate.setHours(23, 59, 59, 999);
+        break;
       case 'monthly':
         startDate = new Date(now.getFullYear(), now.getMonth(), 1);
         endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0);
@@ -280,10 +291,11 @@ export function Targets({ targets, exercises, workouts, onAddTarget, onEditTarge
                 </label>
                 <select
                   value={formData.period}
-                  onChange={(e) => setFormData({ ...formData, period: e.target.value as 'monthly' | 'yearly' })}
+                  onChange={(e) => setFormData({ ...formData, period: e.target.value as 'weekly' | 'monthly' | 'yearly' })}
                   className="w-full p-3 border border-solarized-base1 rounded-lg focus:ring-2 focus:ring-solarized-blue focus:border-transparent bg-solarized-base3 text-solarized-base02"
                   required
                 >
+                  <option value="weekly">Weekly</option>
                   <option value="monthly">Monthly</option>
                   <option value="yearly">Yearly</option>
                 </select>
@@ -302,6 +314,24 @@ export function Targets({ targets, exercises, workouts, onAddTarget, onEditTarge
                 min="1"
                 required
               />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-solarized-base01 mb-2">
+                Category (optional)
+              </label>
+              <select
+                value={formData.category}
+                onChange={(e) => setFormData({ ...formData, category: e.target.value, exerciseId: formData.exerciseId && exercises.find(ex => ex.id === formData.exerciseId)?.category === e.target.value ? formData.exerciseId : '' })}
+                className="w-full p-3 border border-solarized-base1 rounded-lg focus:ring-2 focus:ring-solarized-blue focus:border-transparent bg-solarized-base3 text-solarized-base02"
+              >
+                <option value="">All categories</option>
+                {categories.map(category => (
+                  <option key={category.value} value={category.value}>
+                    {category.label}
+                  </option>
+                ))}
+              </select>
             </div>
 
             <div>
@@ -328,24 +358,6 @@ export function Targets({ targets, exercises, workouts, onAddTarget, onEditTarge
                     </optgroup>
                   );
                 })}
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-solarized-base01 mb-2">
-                Category (optional)
-              </label>
-              <select
-                value={formData.category}
-                onChange={(e) => setFormData({ ...formData, category: e.target.value, exerciseId: formData.exerciseId && exercises.find(ex => ex.id === formData.exerciseId)?.category === e.target.value ? formData.exerciseId : '' })}
-                className="w-full p-3 border border-solarized-base1 rounded-lg focus:ring-2 focus:ring-solarized-blue focus:border-transparent bg-solarized-base3 text-solarized-base02"
-              >
-                <option value="">All categories</option>
-                {categories.sort((a, b) => a.label.localeCompare(b.label)).map(category => (
-                  <option key={category.value} value={category.value}>
-                    {category.label}
-                  </option>
-                ))}
               </select>
             </div>
 
