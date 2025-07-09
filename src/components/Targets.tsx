@@ -526,13 +526,6 @@ export function Targets({ targets, exercises, workouts, onAddTarget, onEditTarge
                           </p>
                         </div>
                       )}
-                      {progress.status === 'needs-attention' && (
-                        <div className="bg-solarized-orange/10 border border-solarized-orange/20 rounded-lg p-3">
-                          <p className="text-sm text-solarized-orange font-medium flex items-center gap-2">
-                            🟠 Time to step it up! You need {target.targetValue - progress.currentValue} more {target.type} to reach your goal.
-                          </p>
-                        </div>
-                      )}
                     </div>
                   </div>
                 </div>
