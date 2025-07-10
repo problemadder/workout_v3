@@ -1,4 +1,5 @@
 import { Workout, Exercise } from '../types';
+import { WorkoutTarget } from '../types';
 
 export function exportWorkoutsToCSV(workouts: Workout[], exercises: Exercise[]): void {
   // Create a map for quick exercise lookup
@@ -198,6 +199,69 @@ export function exportExercisesToCSV(exercises: Exercise[]): void {
     const url = URL.createObjectURL(blob);
     link.setAttribute('href', url);
     link.setAttribute('download', `fitness-exercises-${new Date().toISOString().split('T')[0]}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  }
+}
+
+export function exportTargetsToCSV(targets: WorkoutTarget[], exercises: Exercise[]): void {
+  // Create a map for quick exercise lookup
+  const exerciseMap = new Map(exercises.map(ex => [ex.id, ex]));
+  
+  // Prepare CSV headers
+  const headers = [
+    'Name',
+    'Type',
+    'Category',
+    'Exercise Name',
+    'Target Value',
+    'Period',
+    'Is Active',
+    'Created Date'
+  ];
+  
+  // Prepare CSV rows
+  const rows: string[][] = [];
+  
+  // Sort targets alphabetically by name
+  const sortedTargets = [...targets].sort((a, b) => a.name.localeCompare(b.name));
+  
+  sortedTargets.forEach(target => {
+    // Fix date formatting to avoid timezone issues
+    const createdDate = new Date(target.createdAt);
+    const formattedDate = `${createdDate.getFullYear()}-${String(createdDate.getMonth() + 1).padStart(2, '0')}-${String(createdDate.getDate()).padStart(2, '0')}`;
+    
+    const exercise = target.exerciseId ? exerciseMap.get(target.exerciseId) : null;
+    
+    rows.push([
+      target.name,
+      target.type,
+      target.category || '',
+      exercise?.name || '',
+      target.targetValue.toString(),
+      target.period,
+      target.isActive ? 'true' : 'false',
+      formattedDate
+    ]);
+  });
+  
+  // Convert to CSV format with proper UTF-8 encoding
+  const csvContent = [
+    headers.map(header => `"${header.replace(/"/g, '""')}"`).join(','),
+    ...rows.map(row => row.map(field => `"${String(field).replace(/"/g, '""')}"`).join(','))
+  ].join('\n');
+  
+  // Create and download the file with UTF-8 encoding
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const link = document.createElement('a');
+  
+  if (link.download !== undefined) {
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', `fitness-targets-${new Date().toISOString().split('T')[0]}.csv`);
     link.style.visibility = 'hidden';
     document.body.appendChild(link);
     link.click();
