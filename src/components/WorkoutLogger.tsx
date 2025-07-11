@@ -36,14 +36,14 @@ export function WorkoutLogger({
   const [numberOfSets, setNumberOfSets] = useState(3);
 
   const categories = [
-    { value: 'abs', label: 'Abs', bgColor: 'bg-yellow-50', borderColor: 'border-yellow-200' },
-    { value: 'arms', label: 'Arms', bgColor: 'bg-blue-50', borderColor: 'border-blue-200' },
-    { value: 'back', label: 'Back', bgColor: 'bg-purple-50', borderColor: 'border-purple-200' },
-    { value: 'cardio', label: 'Cardio', bgColor: 'bg-red-50', borderColor: 'border-red-200' },
-    { value: 'chest', label: 'Chest', bgColor: 'bg-pink-50', borderColor: 'border-pink-200' },
-    { value: 'full-body', label: 'Full Body', bgColor: 'bg-indigo-50', borderColor: 'border-indigo-200' },
-    { value: 'legs', label: 'Legs', bgColor: 'bg-green-50', borderColor: 'border-green-200' },
-    { value: 'shoulders', label: 'Shoulders', bgColor: 'bg-gray-50', borderColor: 'border-gray-200' }
+    { value: 'abs', label: 'Abs', borderColor: 'border-solarized-yellow' },
+    { value: 'arms', label: 'Arms', borderColor: 'border-solarized-blue' },
+    { value: 'back', label: 'Back', borderColor: 'border-solarized-violet' },
+    { value: 'cardio', label: 'Cardio', borderColor: 'border-solarized-red' },
+    { value: 'chest', label: 'Chest', borderColor: 'border-solarized-magenta' },
+    { value: 'full-body', label: 'Full Body', borderColor: 'border-solarized-cyan' },
+    { value: 'legs', label: 'Legs', borderColor: 'border-solarized-green' },
+    { value: 'shoulders', label: 'Shoulders', borderColor: 'border-solarized-orange' }
   ].sort((a, b) => a.label.localeCompare(b.label));
 
   // Sort exercises alphabetically
@@ -208,7 +208,7 @@ export function WorkoutLogger({
 
   const getCategoryStyle = (category: Exercise['category']) => {
     const categoryConfig = categories.find(c => c.value === category);
-    return categoryConfig ? `${categoryConfig.bgColor} ${categoryConfig.borderColor}` : 'bg-solarized-base1/10 border-solarized-base1/20';
+    return categoryConfig ? categoryConfig.borderColor : 'border-solarized-base1';
   };
 
   const getPlaceholderText = (exerciseId: string, setPosition: number) => {
@@ -365,8 +365,8 @@ export function WorkoutLogger({
 
         {/* Compact Exercise Groups with Category Background */}
         {groupedSets().map((group, groupIndex) => (
-          <div key={`${group.exerciseId}-${groupIndex}`} className={`rounded-xl p-3 border ${
-            group.exercise ? getCategoryStyle(group.exercise.category) : 'bg-solarized-base2 border-solarized-base1'
+          <div key={`${group.exerciseId}-${groupIndex}`} className={`bg-solarized-base2 rounded-xl p-3 border-2 ${
+            group.exercise ? getCategoryStyle(group.exercise.category) : 'border-solarized-base1'
           }`}>
             {/* Compact Exercise Header */}
             <div className="flex items-center justify-between mb-2">
@@ -375,12 +375,12 @@ export function WorkoutLogger({
                   {group.exercise?.name || 'Unknown Exercise'}
                 </h3>
                 {group.exercise && (
-                  <span className="text-xs px-1.5 py-0.5 rounded-full bg-white/50 text-solarized-base02 border border-white/30">
+                  <span className="text-xs px-1.5 py-0.5 rounded-full bg-solarized-base1/20 text-solarized-base02 border border-solarized-base1/30">
                     {categories.find(c => c.value === group.exercise!.category)?.label}
                   </span>
                 )}
               </div>
-              <span className="text-xs text-solarized-base01 bg-white/30 px-2 py-0.5 rounded-full flex-shrink-0">
+              <span className="text-xs text-solarized-base01 bg-solarized-base1/20 px-2 py-0.5 rounded-full flex-shrink-0">
                 {group.sets.length}
               </span>
             </div>
@@ -391,7 +391,7 @@ export function WorkoutLogger({
                 const setPosition = getSetPositionForExercise(set.exerciseId, originalIndex);
                 
                 return (
-                  <div key={originalIndex} className="bg-white/40 rounded-lg p-2 border border-white/30">
+                  <div key={originalIndex} className="bg-solarized-base3 rounded-lg p-2 border border-solarized-base1/30">
                     <div className="flex items-center justify-between mb-1">
                       <span className="text-xs font-medium text-solarized-base02">
                         Set {setNumber}
@@ -409,7 +409,7 @@ export function WorkoutLogger({
                       value={set.reps || ''}
                       onChange={(e) => updateSet(originalIndex, 'reps', parseInt(e.target.value) || 0)}
                       placeholder={getPlaceholderText(set.exerciseId, setPosition)}
-                      className="w-full p-2 border border-solarized-base1 rounded-lg focus:ring-2 focus:ring-solarized-blue focus:border-transparent text-lg font-bold bg-white text-solarized-base02 placeholder-gray-400 placeholder:text-xs text-center"
+                      className="w-full p-2 border border-solarized-base1 rounded-lg focus:ring-2 focus:ring-solarized-blue focus:border-transparent text-lg font-bold bg-solarized-base3 text-solarized-base02 placeholder-solarized-base01 placeholder:text-xs text-center"
                       min="0"
                     />
                   </div>
@@ -420,7 +420,7 @@ export function WorkoutLogger({
             {/* Add Set Button */}
             <button
               onClick={() => addSingleSet(group.exerciseId)}
-              className="w-full bg-white/30 text-solarized-base02 py-2 px-3 rounded-lg text-sm font-medium hover:bg-white/50 transition-colors flex items-center justify-center gap-1 border border-white/30"
+              className="w-full bg-solarized-base1/20 text-solarized-base02 py-2 px-3 rounded-lg text-sm font-medium hover:bg-solarized-base1/30 transition-colors flex items-center justify-center gap-1 border border-solarized-base1/30"
             >
               <Plus size={14} />
               Add Set

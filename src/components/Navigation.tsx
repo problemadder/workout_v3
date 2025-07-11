@@ -8,7 +8,6 @@ interface NavigationProps {
 
 export function Navigation({ activeTab, onTabChange }: NavigationProps) {
   const tabs = [
-    { id: 'dashboard', label: 'Home', icon: Home },
     { id: 'workout', label: 'Workout', icon: Calendar },
     { id: 'exercises', label: 'Exercises', icon: Dumbbell },
     { id: 'templates', label: 'Templates', icon: BookOpen },
