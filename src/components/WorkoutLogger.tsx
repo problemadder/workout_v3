@@ -225,6 +225,65 @@ export function WorkoutLogger({
     return parts.length > 0 ? parts.join(' ') : 'Enter reps';
   };
 
+  const RepsInput = ({ exerciseId, setPosition, value, onChange, originalIndex }: {
+    exerciseId: string;
+    setPosition: number;
+    value: number;
+    onChange: (value: number) => void;
+    originalIndex: number;
+  }) => {
+    const stats = getStatsForSet(exerciseId, setPosition);
+    const [isFocused, setIsFocused] = useState(false);
+    const [inputValue, setInputValue] = useState(value?.toString() || '');
+
+    useEffect(() => {
+      setInputValue(value?.toString() || '');
+    }, [value]);
+
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      const newValue = e.target.value;
+      setInputValue(newValue);
+      onChange(parseInt(newValue) || 0);
+    };
+
+    const showPlaceholder = !isFocused && !inputValue;
+    
+    return (
+      <div className="relative">
+        <input
+          type="number"
+          value={inputValue}
+          onChange={handleChange}
+          onFocus={() => setIsFocused(true)}
+          onBlur={() => setIsFocused(false)}
+          className="w-full p-3 border border-solarized-base1 rounded-lg focus:ring-2 focus:ring-solarized-blue focus:border-transparent text-xl font-bold bg-solarized-base3 text-solarized-base02 text-center"
+          min="0"
+        />
+        {showPlaceholder && (stats.max > 0 || stats.average > 0) && (
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none text-sm">
+            {stats.max > 0 && (
+              <span className="mr-2">
+                <span className="text-solarized-base1">↑</span>
+                <span className="text-solarized-base01">{stats.max}</span>
+              </span>
+            )}
+            {stats.average > 0 && (
+              <span>
+                <span className="text-solarized-base1">⌀</span>
+                <span className="text-solarized-base01">{stats.average}</span>
+              </span>
+            )}
+          </div>
+        )}
+        {showPlaceholder && stats.max === 0 && stats.average === 0 && (
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none text-sm text-solarized-base01">
+            Enter reps
+          </div>
+        )}
+      </div>
+    );
+  };
+    
   const incrementSets = () => {
     setNumberOfSets(prev => Math.min(prev + 1, 10));
   };
@@ -404,13 +463,12 @@ export function WorkoutLogger({
                       </button>
                     </div>
                     
-                    <input
-                      type="number"
+                    <RepsInput
+                      exerciseId={set.exerciseId}
+                      setPosition={setPosition}
                       value={set.reps || ''}
-                      onChange={(e) => updateSet(originalIndex, 'reps', parseInt(e.target.value) || 0)}
-                      placeholder={getPlaceholderText(set.exerciseId, setPosition)}
-                      className="w-full p-3 border border-solarized-base1 rounded-lg focus:ring-2 focus:ring-solarized-blue focus:border-transparent text-xl font-bold bg-solarized-base3 text-solarized-base02 placeholder-solarized-base01 placeholder:text-sm text-center"
-                      min="0"
+                      onChange={(value) => updateSet(originalIndex, 'reps', value)}
+                      originalIndex={originalIndex}
                     />
                   </div>
                 );
