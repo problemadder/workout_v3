@@ -30,7 +30,7 @@ export function Navigation({ activeTab, onTabChange }: NavigationProps) {
                   : 'text-solarized-base01 hover:text-solarized-base00 hover:bg-solarized-base2'
               }`}
             >
-              <Icon size={20} className="mb-1.5" />
+              <Icon size={20} className="mb-0.5" />
               <span className="text-xs font-medium whitespace-nowrap">{label}</span>
             </button>
           ))}
