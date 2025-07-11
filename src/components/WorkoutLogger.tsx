@@ -346,7 +346,7 @@ export function WorkoutLogger({
         <div className="flex gap-2">
           <button
             onClick={() => setShowTemplates(!showTemplates)}
-            className="flex-1 bg-solarized-violet text-solarized-base3 py-2.5 px-3 rounded-lg text-sm font-medium hover:bg-solarized-violet/90 transition-colors flex items-center justify-center gap-1.5"
+            className="flex-1 bg-solarized-violet text-solarized-base3 py-3 px-4 rounded-lg text-sm font-medium hover:bg-solarized-violet/90 transition-colors flex items-center justify-center gap-1.5 touch-manipulation"
           >
             <BookOpen size={16} />
             Templates
@@ -355,7 +355,7 @@ export function WorkoutLogger({
           {sets.length > 0 && onAddTemplate && (
             <button
               onClick={() => setShowSaveTemplate(!showSaveTemplate)}
-              className="flex-1 bg-solarized-yellow text-solarized-base3 py-2.5 px-3 rounded-lg text-sm font-medium hover:bg-solarized-yellow/90 transition-colors flex items-center justify-center gap-1.5"
+              className="flex-1 bg-solarized-yellow text-solarized-base3 py-3 px-4 rounded-lg text-sm font-medium hover:bg-solarized-yellow/90 transition-colors flex items-center justify-center gap-1.5 touch-manipulation"
             >
               <Star size={16} />
               Save Template
@@ -375,7 +375,7 @@ export function WorkoutLogger({
                   <button
                     key={template.id}
                     onClick={() => useTemplate(template)}
-                    className="w-full text-left p-2.5 bg-solarized-base3 rounded-lg hover:bg-solarized-violet/10 border border-solarized-base1 hover:border-solarized-violet/20 transition-colors"
+                    className="w-full text-left p-3 bg-solarized-base3 rounded-lg hover:bg-solarized-violet/10 border border-solarized-base1 hover:border-solarized-violet/20 transition-colors touch-manipulation"
                   >
                     <div className="font-medium text-solarized-base02 text-sm">{template.name}</div>
                     <div className="text-xs text-solarized-base01">
@@ -404,7 +404,7 @@ export function WorkoutLogger({
                 <button
                   onClick={handleSaveAsTemplate}
                   disabled={!templateName.trim()}
-                  className="flex-1 bg-solarized-yellow text-solarized-base3 py-2 px-3 rounded-lg text-sm font-medium hover:bg-solarized-yellow/90 transition-colors disabled:bg-solarized-base1 disabled:cursor-not-allowed disabled:text-solarized-base01"
+                  className="flex-1 bg-solarized-yellow text-solarized-base3 py-3 px-4 rounded-lg text-sm font-medium hover:bg-solarized-yellow/90 transition-colors disabled:bg-solarized-base1 disabled:cursor-not-allowed disabled:text-solarized-base01 touch-manipulation"
                 >
                   Save
                 </button>
@@ -413,7 +413,7 @@ export function WorkoutLogger({
                     setShowSaveTemplate(false);
                     setTemplateName('');
                   }}
-                  className="flex-1 bg-solarized-base1 text-solarized-base02 py-2 px-3 rounded-lg text-sm font-medium hover:bg-solarized-base0 transition-colors"
+                  className="flex-1 bg-solarized-base1 text-solarized-base02 py-3 px-4 rounded-lg text-sm font-medium hover:bg-solarized-base0 transition-colors touch-manipulation"
                 >
                   Cancel
                 </button>
@@ -457,7 +457,7 @@ export function WorkoutLogger({
                       </span>
                       <button
                         onClick={() => removeSet(originalIndex)}
-                        className="p-0.5 text-solarized-red hover:bg-solarized-red/10 rounded"
+                        className="p-1 text-solarized-red hover:bg-solarized-red/10 rounded touch-manipulation"
                       >
                         <X size={12} />
                       </button>
@@ -478,7 +478,7 @@ export function WorkoutLogger({
             {/* Add Set Button */}
             <button
               onClick={() => addSingleSet(group.exerciseId)}
-              className="w-full bg-solarized-base1/20 text-solarized-base02 py-2 px-3 rounded-lg text-sm font-medium hover:bg-solarized-base1/30 transition-colors flex items-center justify-center gap-1 border border-solarized-base1/30"
+              className="w-full bg-solarized-base1/20 text-solarized-base02 py-3 px-4 rounded-lg text-sm font-medium hover:bg-solarized-base1/30 transition-colors flex items-center justify-center gap-1 border border-solarized-base1/30 touch-manipulation"
             >
               <Plus size={14} />
               Add Set
@@ -490,7 +490,7 @@ export function WorkoutLogger({
         {!showAddExercise ? (
           <button
             onClick={() => setShowAddExercise(true)}
-            className="w-full bg-solarized-blue text-solarized-base3 py-3 px-4 rounded-xl font-medium hover:bg-solarized-blue/90 transition-colors flex items-center justify-center gap-2"
+            className="w-full bg-solarized-blue text-solarized-base3 py-4 px-5 rounded-xl font-medium hover:bg-solarized-blue/90 transition-colors flex items-center justify-center gap-2 touch-manipulation"
           >
             <Plus size={18} />
             Add Exercise
@@ -532,7 +532,7 @@ export function WorkoutLogger({
                   <button
                     type="button"
                     onClick={decrementSets}
-                    className="bg-solarized-base1/30 text-solarized-base01 p-2 rounded-lg hover:bg-solarized-base1/50 transition-colors"
+                    className="bg-solarized-base1/30 text-solarized-base01 p-3 rounded-lg hover:bg-solarized-base1/50 transition-colors touch-manipulation"
                   >
                     <Minus size={14} />
                   </button>
@@ -547,7 +547,7 @@ export function WorkoutLogger({
                   <button
                     type="button"
                     onClick={incrementSets}
-                    className="bg-solarized-base1/30 text-solarized-base01 p-2 rounded-lg hover:bg-solarized-base1/50 transition-colors"
+                    className="bg-solarized-base1/30 text-solarized-base01 p-3 rounded-lg hover:bg-solarized-base1/50 transition-colors touch-manipulation"
                   >
                     <Plus size={14} />
                   </button>
@@ -558,13 +558,13 @@ export function WorkoutLogger({
                 <button
                   onClick={addExerciseWithSets}
                   disabled={!selectedExerciseId || numberOfSets < 1}
-                  className="flex-1 bg-solarized-green text-solarized-base3 py-2 px-3 rounded-lg text-sm font-medium hover:bg-solarized-green/90 transition-colors disabled:bg-solarized-base1 disabled:cursor-not-allowed disabled:text-solarized-base01"
+                  className="flex-1 bg-solarized-green text-solarized-base3 py-3 px-4 rounded-lg text-sm font-medium hover:bg-solarized-green/90 transition-colors disabled:bg-solarized-base1 disabled:cursor-not-allowed disabled:text-solarized-base01 touch-manipulation"
                 >
                   Add {numberOfSets} Set{numberOfSets !== 1 ? 's' : ''}
                 </button>
                 <button
                   onClick={() => setShowAddExercise(false)}
-                  className="flex-1 bg-solarized-base1 text-solarized-base02 py-2 px-3 rounded-lg text-sm font-medium hover:bg-solarized-base0 transition-colors"
+                  className="flex-1 bg-solarized-base1 text-solarized-base02 py-3 px-4 rounded-lg text-sm font-medium hover:bg-solarized-base0 transition-colors touch-manipulation"
                 >
                   Cancel
                 </button>
@@ -592,14 +592,14 @@ export function WorkoutLogger({
           <div className="flex gap-2 pt-2">
             <button
               onClick={handleSave}
-              className="flex-1 bg-solarized-green text-solarized-base3 py-3 px-4 rounded-xl font-medium hover:bg-solarized-green/90 transition-colors flex items-center justify-center gap-2"
+              className="flex-1 bg-solarized-green text-solarized-base3 py-4 px-5 rounded-xl font-medium hover:bg-solarized-green/90 transition-colors flex items-center justify-center gap-2 touch-manipulation"
             >
               <Save size={18} />
               {todaysWorkout ? 'Update' : 'Save'}
             </button>
             <button
               onClick={resetWorkout}
-              className="bg-solarized-base1 text-solarized-base02 px-4 py-3 rounded-xl hover:bg-solarized-base0 transition-colors"
+              className="bg-solarized-base1 text-solarized-base02 px-5 py-4 rounded-xl hover:bg-solarized-base0 transition-colors touch-manipulation"
             >
               <RotateCcw size={18} />
             </button>
