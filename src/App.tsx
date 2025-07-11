@@ -13,7 +13,7 @@ import { defaultExercises } from './data/defaultExercises';
 import { isToday, getDaysAgo } from './utils/dateUtils';
 
 function App() {
-  const [activeTab, setActiveTab] = useState('workout');
+  const [activeTab, setActiveTab] = useState('dashboard');
   const [exercises, setExercises] = useLocalStorage<Exercise[]>('abs-exercises', []);
   const [workouts, setWorkouts] = useLocalStorage<Workout[]>('abs-workouts', []);
   const [templates, setTemplates] = useLocalStorage<WorkoutTemplate[]>('abs-templates', []);
@@ -293,6 +293,14 @@ function App() {
   return (
     <div className="min-h-screen bg-solarized-base3">
       <main className="relative">
+        {activeTab === 'dashboard' && (
+          <Dashboard 
+            workouts={sortedWorkouts}
+            stats={stats}
+            onStartWorkout={handleStartWorkout}
+          />
+        )}
+        
         {activeTab === 'exercises' && (
           <ExerciseList
             exercises={exercises}
