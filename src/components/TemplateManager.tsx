@@ -252,11 +252,21 @@ export function TemplateManager({
       // Create templates
       let importedCount = 0;
       let partiallyImported = 0;
+      let skippedDuplicates = 0;
+      
       templateMap.forEach((templateExercises, templateName) => {
         console.log(`Creating template: ${templateName} with ${templateExercises.length} exercises`);
         // Check if template already exists
         
         if (templateExercises.length > 0) {
+          // Check if template with same name already exists
+          const existingTemplate = templates.find(t => t.name.toLowerCase() === templateName.toLowerCase());
+          if (existingTemplate) {
+            console.log(`Template "${templateName}" already exists, skipping`);
+            skippedDuplicates++;
+            return;
+          }
+          
           console.log(`About to call onAddTemplate for: ${templateName}`);
           console.log(`Template data:`, {
             name: templateName,
@@ -287,6 +297,9 @@ export function TemplateManager({
       }
       if (partiallyImported > 0) {
         message += `${partiallyImported} template(s) imported partially (some exercises were missing). `;
+      }
+      if (skippedDuplicates > 0) {
+        message += `${skippedDuplicates} template(s) skipped (already exist). `;
       }
       if (missingExercises.size > 0) {
         message += `\n\nMissing exercises: ${Array.from(missingExercises).join(', ')}`;
