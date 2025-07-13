@@ -257,10 +257,18 @@ export function TemplateManager({
         // Check if template already exists
         
         if (templateExercises.length > 0) {
+          console.log(`About to call onAddTemplate for: ${templateName}`);
+          console.log(`Template data:`, {
+            name: templateName,
+            exercises: templateExercises
+          });
+          
           onAddTemplate({
             name: templateName,
             exercises: templateExercises
           });
+          
+          console.log(`onAddTemplate called successfully for: ${templateName}`);
           
           if (skippedTemplates.has(templateName)) {
             partiallyImported++;
@@ -269,6 +277,8 @@ export function TemplateManager({
           }
         }
       });
+      
+      console.log(`Final counts: imported=${importedCount}, partiallyImported=${partiallyImported}`);
 
       // Create detailed feedback message
       let message = '';

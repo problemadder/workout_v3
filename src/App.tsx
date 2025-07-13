@@ -159,12 +159,24 @@ function App() {
   };
 
   const handleAddTemplate = (templateData: Omit<WorkoutTemplate, 'id' | 'createdAt'>) => {
+    console.log('App.handleAddTemplate called with:', templateData);
+    
+    // Check if template with same name already exists
+    const existingTemplate = templates.find(t => t.name.toLowerCase() === templateData.name.toLowerCase());
+    if (existingTemplate) {
+      console.log(`Template "${templateData.name}" already exists, skipping`);
+      return;
+    }
+    
     const newTemplate: WorkoutTemplate = {
       ...templateData,
       id: crypto.randomUUID(),
       createdAt: new Date()
     };
+    
+    console.log('Creating new template:', newTemplate);
     setTemplates([...templates, newTemplate]);
+    console.log('Template added successfully');
   };
 
   const handleEditTemplate = (id: string, templateData: Omit<WorkoutTemplate, 'id' | 'createdAt'>) => {
