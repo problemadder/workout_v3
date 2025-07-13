@@ -254,11 +254,19 @@ export function TemplateManager({
       let partiallyImported = 0;
       let skippedDuplicates = 0;
       
-      templateMap.forEach((templateExercises, templateName) => {
+      for (const [templateName, templateExercises] of templateMap.entries()) {
         console.log(`Creating template: ${templateName} with ${templateExercises.length} exercises`);
         // Check if template already exists
         
         if (templateExercises.length > 0) {
+          // Check if template with same name already exists
+          const existingTemplate = templates.find(t => t.name.toLowerCase() === templateName.toLowerCase());
+          if (existingTemplate) {
+            console.log(`Template "${templateName}" already exists, skipping`);
+            skippedDuplicates++;
+            continue;
+          }
+          
           // Check if template with same name already exists
           const existingTemplate = templates.find(t => t.name.toLowerCase() === templateName.toLowerCase());
           if (existingTemplate) {
@@ -280,13 +288,16 @@ export function TemplateManager({
           
           console.log(`onAddTemplate called successfully for: ${templateName}`);
           
+          // Small delay to ensure the state update is processed
+          await new Promise(resolve => setTimeout(resolve, 10));
+          
           if (skippedTemplates.has(templateName)) {
             partiallyImported++;
           } else {
             importedCount++;
           }
         }
-      });
+      }
       
       console.log(`Final counts: imported=${importedCount}, partiallyImported=${partiallyImported}`);
 
@@ -297,6 +308,9 @@ export function TemplateManager({
       }
       if (partiallyImported > 0) {
         message += `${partiallyImported} template(s) imported partially (some exercises were missing). `;
+      }
+      if (skippedDuplicates > 0) {
+        message += `${skippedDuplicates} template(s) skipped (already exist). `;
       }
       if (skippedDuplicates > 0) {
         message += `${skippedDuplicates} template(s) skipped (already exist). `;

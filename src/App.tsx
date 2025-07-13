@@ -154,13 +154,6 @@ function App() {
     // Also remove from templates
     setTemplates(templates.map(template => ({
       ...template,
-      exercises: template.exercises.filter(ex => ex.exerciseId !== id)
-    })).filter(template => template.exercises.length > 0));
-  };
-
-  const handleAddTemplate = (templateData: Omit<WorkoutTemplate, 'id' | 'createdAt'>) => {
-    console.log('App.handleAddTemplate called with:', templateData);
-    
     const newTemplate: WorkoutTemplate = {
       ...templateData,
       id: crypto.randomUUID(),
