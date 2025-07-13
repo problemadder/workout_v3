@@ -267,14 +267,6 @@ export function TemplateManager({
             continue;
           }
           
-          // Check if template with same name already exists
-          const existingTemplate = templates.find(t => t.name.toLowerCase() === templateName.toLowerCase());
-          if (existingTemplate) {
-            console.log(`Template "${templateName}" already exists, skipping`);
-            skippedDuplicates++;
-            return;
-          }
-          
           console.log(`About to call onAddTemplate for: ${templateName}`);
           console.log(`Template data:`, {
             name: templateName,
