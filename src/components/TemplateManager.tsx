@@ -201,6 +201,10 @@ export function TemplateManager({
       // Parse templates
       const templateMap = new Map<string, { exerciseId: string; sets: number }[]>();
       const exerciseMap = new Map(exercises.map(ex => [ex.name.toLowerCase(), ex]));
+      
+      console.log('Available exercises:', exercises.map(ex => ex.name));
+      console.log('Exercise map keys:', Array.from(exerciseMap.keys()));
+      
       const missingExercises = new Set<string>();
       const skippedTemplates = new Set<string>();
 
@@ -219,7 +223,10 @@ export function TemplateManager({
 
         if (!templateName || !exerciseName || isNaN(sets)) continue;
 
+        console.log(`Looking for exercise: "${exerciseName.toLowerCase()}" in exercise map`);
         const exercise = exerciseMap.get(exerciseName.toLowerCase());
+        console.log(`Found exercise:`, exercise);
+        
         if (!exercise) {
           console.warn(`Exercise "${exerciseName}" not found, skipping row for template "${templateName}"`);
           missingExercises.add(exerciseName);
@@ -235,6 +242,8 @@ export function TemplateManager({
           exerciseId: exercise.id,
           sets
         });
+        
+        console.log(`Added exercise "${exerciseName}" to template "${templateName}"`);
       }
 
       console.log('Template map:', templateMap);
