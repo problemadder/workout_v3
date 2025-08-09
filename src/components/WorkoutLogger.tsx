@@ -283,7 +283,8 @@ export function WorkoutLogger({
   const searchFilteredExercises = searchQuery.trim() 
     ? filteredExercises.filter(ex => 
         ex.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (ex.description && ex.description.toLowerCase().includes(searchQuery.toLowerCase()))
+        (ex.description && ex.description.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        categories.find(c => c.value === ex.category)?.label.toLowerCase().includes(searchQuery.toLowerCase())
       )
     : filteredExercises;
 
