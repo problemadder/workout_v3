@@ -480,6 +480,17 @@ export function WorkoutLogger({
                       placeholder={getPlaceholderText(set.exerciseId, setPosition)}
                       className="w-full p-2 border border-solarized-base1 rounded-lg focus:ring-2 focus:ring-solarized-blue focus:border-transparent text-lg font-bold bg-solarized-base3 text-solarized-base02 placeholder-gray-400 placeholder:text-xs text-center"
                       min="0"
+                      onKeyDown={(e) => {
+                        if (e.key === 'ArrowUp') {
+                          e.preventDefault();
+                          const currentValue = parseFloat(e.currentTarget.value) || 0;
+                          updateSet(originalIndex, 'reps', currentValue + 1);
+                        } else if (e.key === 'ArrowDown') {
+                          e.preventDefault();
+                          const currentValue = parseFloat(e.currentTarget.value) || 0;
+                          updateSet(originalIndex, 'reps', Math.max(0, currentValue - 1));
+                        }
+                      }}
                     />
                   </div>
                 );
