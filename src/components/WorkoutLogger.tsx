@@ -86,12 +86,28 @@ export function WorkoutLogger({
   };
 
   const addSingleSet = (exerciseId?: string) => {
-    const defaultExerciseId = exerciseId || 
-      (selectedCategory !== 'all' 
+    if (exerciseId) {
+      // Find the last index of this exercise in the sets array
+      let lastIndex = -1;
+      for (let i = sets.length - 1; i >= 0; i--) {
+        if (sets[i].exerciseId === exerciseId) {
+          lastIndex = i;
+          break;
+        }
+      }
+      
+      // Insert the new set right after the last set of this exercise
+      const newSets = [...sets];
+      newSets.splice(lastIndex + 1, 0, { exerciseId, reps: 0 });
+      setSets(newSets);
+    } else {
+      // Fallback for when no specific exercise is provided
+      const defaultExerciseId = (selectedCategory !== 'all' 
         ? sortedExercises.find(e => e.category === selectedCategory)?.id 
         : sortedExercises[0]?.id) || '';
-    
-    setSets([...sets, { exerciseId: defaultExerciseId, reps: 0 }]); // Start with 0 reps to show placeholder
+      
+      setSets([...sets, { exerciseId: defaultExerciseId, reps: 0 }]);
+    }
   };
 
   const updateSet = (index: number, field: keyof Omit<WorkoutSet, 'id'>, value: any) => {
