@@ -462,7 +462,7 @@ export function WorkoutLogger({
             {/* Add another set of this exercise */}
             <button
               onClick={() => addSingleSet(group.exerciseId)}
-              className="w-full mt-3 bg-solarized-base1/30 text-solarized-base01 border-none py-2 px-4 rounded-lg cursor-pointer font-semibold transition-all duration-200 ease-in-out hover:bg-solarized-base1/50 hover:-translate-y-0.5 active:translate-y-0 flex items-center justify-center gap-2 min-h-12"
+              className="w-full mt-3 bg-solarized-base3/50 text-solarized-base02 border border-solarized-base1/30 py-2 px-4 rounded-lg cursor-pointer font-medium transition-all duration-200 ease-in-out hover:bg-solarized-base3 hover:border-solarized-base1/50 flex items-center justify-center gap-2"
             >
               <Plus size={16} />
               Add Another Set
