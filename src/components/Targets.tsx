@@ -19,7 +19,7 @@ export function Targets({ targets, exercises, workouts, onAddTarget, onEditTarge
     type: 'sets' as 'sets' | 'reps',
     category: '' as string,
     exerciseId: '',
-    targetValue: 10,
+    targetValue: 0,
     period: 'monthly' as 'weekly' | 'monthly' | 'yearly',
     isActive: true
   });
@@ -63,7 +63,7 @@ export function Targets({ targets, exercises, workouts, onAddTarget, onEditTarge
       type: 'sets',
       category: '',
       exerciseId: '',
-      targetValue: 10,
+      targetValue: 0,
       period: 'weekly',
       isActive: true
     });
@@ -90,7 +90,7 @@ export function Targets({ targets, exercises, workouts, onAddTarget, onEditTarge
       type: 'sets',
       category: '',
       exerciseId: '',
-      targetValue: 10,
+      targetValue: 0,
       period: 'weekly',
       isActive: true
     });
@@ -308,9 +308,10 @@ export function Targets({ targets, exercises, workouts, onAddTarget, onEditTarge
               </label>
               <input
                 type="number"
-                value={formData.targetValue}
+                value={formData.targetValue || ''}
                 onChange={(e) => setFormData({ ...formData, targetValue: parseInt(e.target.value) || 0 })}
-                className="w-full p-3 border border-solarized-base1 rounded-lg focus:ring-2 focus:ring-solarized-blue focus:border-transparent bg-solarized-base3 text-solarized-base02"
+                className="w-full p-3 border border-solarized-base1 rounded-lg focus:ring-2 focus:ring-solarized-orange focus:border-transparent bg-solarized-base3 text-solarized-base02"
+                placeholder="Enter target value"
                 min="1"
                 required
               />
