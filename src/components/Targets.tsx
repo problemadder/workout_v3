@@ -412,7 +412,7 @@ export function Targets({ targets, exercises, workouts, onAddTarget, onEditTarge
                           {target.type}
                         </span>
                         {target.category && (
-                          <span className={`text-xs px-2 py-1 rounded-full border ${getCategoryStyle(target.category)}`}>
+                          <span className={`text-xs px-2 py-1 rounded-full border ${getCategoryStyle(target.category)}`} style={{ backgroundColor: categories.find(c => c.value === target.category)?.bgColor }}>
                             {categories.find(c => c.value === target.category)?.label}
                           </span>
                         )}

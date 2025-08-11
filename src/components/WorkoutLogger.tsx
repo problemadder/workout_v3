@@ -451,7 +451,7 @@ export function WorkoutLogger({
                   {group.exercise?.name || 'Unknown Exercise'}
                 </h3>
                 {group.exercise && (
-                  <span className={`text-xs px-2 py-1 rounded-full border ${getCategoryStyle(group.exercise.category)}`}>
+                  <span className={`text-xs px-2 py-1 rounded-full border ${getCategoryStyle(group.exercise.category)}`} style={{ backgroundColor: categories.find(c => c.value === group.exercise!.category)?.bgColor }}>
                     {categories.find(c => c.value === group.exercise!.category)?.label}
                   </span>
                 )}
