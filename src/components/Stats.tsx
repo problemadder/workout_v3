@@ -12,7 +12,6 @@ interface StatsProps {
   stats: WorkoutStats;
 }
 
-export function Stats({ workouts, exercises, stats }: StatsProps) {
 export function Stats({ workouts, exercises, customCategoryColors, stats }: StatsProps) {
   const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear());
   const [selectedExerciseId, setSelectedExerciseId] = useState<string>('');
