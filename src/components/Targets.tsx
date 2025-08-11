@@ -224,7 +224,14 @@ export function Targets({ targets, exercises, workouts, onAddTarget, onEditTarge
     if (categoryConfig) {
       return categoryConfig.color;
     }
-    // Default color for custom/unknown categories
+    
+    // Check for custom category colors
+    const customColor = customCategoryColors.find(c => c.category === category);
+    if (customColor) {
+      return `${customColor.color} ${customColor.textColor} ${customColor.borderColor}`;
+    }
+    
+    // Default color for unknown categories
     return 'bg-gray-100 text-gray-800 border-gray-200';
   };
 
