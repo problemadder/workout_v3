@@ -13,7 +13,6 @@ interface ExerciseListProps {
   onAddCustomCategoryColor: (categoryColor: CustomCategoryColor) => void;
 }
 
-export function ExerciseList({ exercises, onAddExercise, onEditExercise, onDeleteExercise }: ExerciseListProps) {
 export function ExerciseList({ 
   exercises, 
   customCategoryColors, 
@@ -282,11 +281,7 @@ export function ExerciseList({
                 </div>
                 
                 <div className="flex items-center justify-between">
-                  <span 
-                    className={`inline-block px-2 py-1 rounded-full text-xs font-medium border ${getCategoryStyle(exercise.category)}`}
-                    onClick={() => handleCategoryClick(exercise.category)}
-                    title={!categories.find(c => c.value === exercise.category) && !customCategoryColors.find(c => c.category === exercise.category) ? 'Click to set color' : ''}
-                  >
+                  <span className={`inline-block px-2 py-1 rounded-full text-xs font-medium border ${getCategoryStyle(exercise.category)}`}>
                     {categories.find(c => c.value === exercise.category)?.label}
                   </span>
                   <div className="flex gap-2">
@@ -313,15 +308,6 @@ export function ExerciseList({
           ))
         )}
       </div>
-
-      {/* Color Picker Modal */}
-      {showColorPicker && (
-        <ColorPicker
-          category={showColorPicker}
-          onSave={handleColorSave}
-          onCancel={handleColorCancel}
-        />
-      )}
     </div>
   );
 }
