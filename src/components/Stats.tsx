@@ -12,6 +12,7 @@ interface StatsProps {
   stats: WorkoutStats;
 }
 
+export function Stats({ workouts, exercises, stats }: StatsProps) {
 export function Stats({ workouts, exercises, customCategoryColors, stats }: StatsProps) {
   const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear());
   const [selectedExerciseId, setSelectedExerciseId] = useState<string>('');
@@ -574,7 +575,12 @@ export function Stats({ workouts, exercises, customCategoryColors, stats }: Stat
         <h3 className="text-lg font-semibold mb-4 flex items-center gap-2 text-solarized-base02">
           <Calendar size={20} className="text-solarized-blue" />
           Last 7 Days
-        </h3>
+        </h3
+    )
+    )
+    }
+  )
+}>
         <div className="space-y-3">
           {weeklyData.map((day, index) => (
             <div key={index} className="flex items-center gap-3">
