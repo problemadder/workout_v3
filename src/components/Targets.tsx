@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Plus, Edit2, Trash2, Target } from 'lucide-react';
 import { WorkoutTarget, Exercise, Workout } from '../types';
+import { durationToSeconds, formatDurationDisplay } from '../utils/durationUtils';
 
 interface TargetsProps {
   targets: WorkoutTarget[];
@@ -16,7 +17,7 @@ export function Targets({ targets, exercises, workouts, onAddTarget, onEditTarge
   const [editingId, setEditingId] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     name: '',
-    type: 'sets' as 'sets' | 'reps',
+    type: 'sets' as 'sets' | 'reps' | 'duration',
     category: '' as string,
     exerciseId: '',
     targetValue: 0,
@@ -138,8 +139,10 @@ export function Targets({ targets, exercises, workouts, onAddTarget, onEditTarge
           if (set.exerciseId === target.exerciseId) {
             if (target.type === 'sets') {
               currentValue += 1;
-            } else {
+            } else if (target.type === 'reps') {
               currentValue += set.reps;
+            } else if (target.type === 'duration' && set.duration) {
+              currentValue += durationToSeconds(set.duration);
             }
           }
         });
@@ -152,8 +155,10 @@ export function Targets({ targets, exercises, workouts, onAddTarget, onEditTarge
           if (exercise && exercise.category === target.category) {
             if (target.type === 'sets') {
               currentValue += 1;
-            } else {
+            } else if (target.type === 'reps') {
               currentValue += set.reps;
+            } else if (target.type === 'duration' && set.duration) {
+              currentValue += durationToSeconds(set.duration);
             }
           }
         });
@@ -276,12 +281,13 @@ export function Targets({ targets, exercises, workouts, onAddTarget, onEditTarge
                 </label>
                 <select
                   value={formData.type}
-                  onChange={(e) => setFormData({ ...formData, type: e.target.value as 'sets' | 'reps' })}
+                  onChange={(e) => setFormData({ ...formData, type: e.target.value as 'sets' | 'reps' | 'duration' })}
                   className="w-full p-3 border border-solarized-base1 rounded-lg focus:ring-2 focus:ring-solarized-blue focus:border-transparent bg-solarized-base3 text-solarized-base02"
                   required
                 >
                   <option value="sets">Sets</option>
                   <option value="reps">Reps</option>
+                  <option value="duration">Duration (seconds)</option>
                 </select>
               </div>
 
@@ -441,11 +447,21 @@ export function Targets({ targets, exercises, workouts, onAddTarget, onEditTarge
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-1">
                         <div className="text-center">
-                          <div className="text-xl font-bold text-solarized-base02">{progress.currentValue}</div>
+                          <div className="text-xl font-bold text-solarized-base02">
+                            {target.type === 'duration' 
+                              ? formatDurationDisplay(progress.currentValue)
+                              : progress.currentValue
+                            }
+                          </div>
                         </div>
                         <div className="text-solarized-base01">/</div>
                         <div className="text-center">
-                          <div className="text-xl font-bold text-solarized-base02">{target.targetValue}</div>
+                          <div className="text-xl font-bold text-solarized-base02">
+                            {target.type === 'duration'
+                              ? formatDurationDisplay(target.targetValue)
+                              : target.targetValue
+                            }
+                          </div>
                         </div>
                         <div className="text-center ml-2">
                           <div className={`text-lg font-bold ${progress.statusColor}`}>

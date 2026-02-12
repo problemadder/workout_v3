@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus, Edit2, Trash2, Dumbbell, Filter } from 'lucide-react';
+import { Plus, Edit2, Trash2, Dumbbell, Filter, Hash, Clock } from 'lucide-react';
 import { Exercise } from '../types';
 
 interface ExerciseListProps {
@@ -16,7 +16,8 @@ export function ExerciseList({ exercises, onAddExercise, onEditExercise, onDelet
   const [formData, setFormData] = useState({
     name: '',
     description: '',
-    category: 'abs' as Exercise['category']
+    category: 'abs' as Exercise['category'],
+    exerciseType: 'reps' as 'reps' | 'time'
   });
 
   const categories = [
@@ -44,7 +45,8 @@ export function ExerciseList({ exercises, onAddExercise, onEditExercise, onDelet
       const exerciseData = {
         name: formData.name.trim(),
         description: formData.description.trim() || undefined,
-        category: formData.category
+        category: formData.category,
+        exerciseType: formData.exerciseType
       };
       
       console.log('Calling onAddExercise/onEditExercise with:', exerciseData);
@@ -59,7 +61,7 @@ export function ExerciseList({ exercises, onAddExercise, onEditExercise, onDelet
       }
 
       // Reset form
-      setFormData({ name: '', description: '', category: 'abs' });
+      setFormData({ name: '', description: '', category: 'abs', exerciseType: 'reps' });
       setShowForm(false);
       
     } catch (error) {
@@ -72,14 +74,15 @@ export function ExerciseList({ exercises, onAddExercise, onEditExercise, onDelet
     setFormData({
       name: exercise.name,
       description: exercise.description || '',
-      category: exercise.category
+      category: exercise.category,
+      exerciseType: exercise.exerciseType || 'reps'
     });
     setEditingId(exercise.id);
     setShowForm(true);
   };
 
   const handleCancel = () => {
-    setFormData({ name: '', description: '', category: 'abs' });
+    setFormData({ name: '', description: '', category: 'abs', exerciseType: 'reps' });
     setEditingId(null);
     setShowForm(false);
   };
@@ -182,6 +185,38 @@ export function ExerciseList({ exercises, onAddExercise, onEditExercise, onDelet
             
             <div>
               <label className="block text-sm font-medium text-solarized-base01 mb-2">
+                Exercise Type *
+              </label>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => setFormData({ ...formData, exerciseType: 'reps' })}
+                  className={`flex-1 py-3 px-4 rounded-lg font-medium transition-colors flex items-center justify-center gap-2 border-2 ${
+                    formData.exerciseType === 'reps'
+                      ? 'bg-solarized-blue text-solarized-base3 border-solarized-blue'
+                      : 'bg-solarized-base3 text-solarized-base01 border-solarized-base1 hover:border-solarized-base0'
+                  }`}
+                >
+                  <Hash size={18} />
+                  Reps
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setFormData({ ...formData, exerciseType: 'time' })}
+                  className={`flex-1 py-3 px-4 rounded-lg font-medium transition-colors flex items-center justify-center gap-2 border-2 ${
+                    formData.exerciseType === 'time'
+                      ? 'bg-solarized-blue text-solarized-base3 border-solarized-blue'
+                      : 'bg-solarized-base3 text-solarized-base01 border-solarized-base1 hover:border-solarized-base0'
+                  }`}
+                >
+                  <Clock size={18} />
+                  Time
+                </button>
+              </div>
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-solarized-base01 mb-2">
                 Category *
               </label>
               <select
@@ -236,9 +271,24 @@ export function ExerciseList({ exercises, onAddExercise, onEditExercise, onDelet
                 </div>
                 
                 <div className="flex items-center justify-between">
-                  <span className={`inline-block px-2 py-1 rounded-full text-xs font-medium border ${getCategoryStyle(exercise.category)}`}>
-                    {categories.find(c => c.value === exercise.category)?.label}
-                  </span>
+                  <div className="flex items-center gap-2">
+                    <span className={`inline-block px-2 py-1 rounded-full text-xs font-medium border ${getCategoryStyle(exercise.category)}`}>
+                      {categories.find(c => c.value === exercise.category)?.label}
+                    </span>
+                    <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-solarized-base1 text-solarized-base02 border border-solarized-base0">
+                      {exercise.exerciseType === 'time' ? (
+                        <>
+                          <Clock size={12} />
+                          Time
+                        </>
+                      ) : (
+                        <>
+                          <Hash size={12} />
+                          Reps
+                        </>
+                      )}
+                    </span>
+                  </div>
                   <div className="flex gap-2">
                     <button
                       onClick={() => handleEdit(exercise)}

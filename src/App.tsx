@@ -12,6 +12,7 @@ import { Exercise, Workout, WorkoutStats, WorkoutTemplate, WorkoutTarget } from 
 import { defaultExercises } from './data/defaultExercises';
 import { isToday, formatDate } from './utils/dateUtils';
 import { saveDraftWorkout, loadDraftWorkout, clearDraftWorkout } from './utils/draftWorkoutUtils';
+import { durationToSeconds } from './utils/durationUtils';
 
 function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -20,7 +21,7 @@ function App() {
   const [templates, setTemplates] = useLocalStorage<WorkoutTemplate[]>('abs-templates', []);
   const [targets, setTargets] = useLocalStorage<WorkoutTarget[]>('abs-targets', []);
   const [pendingWorkout, setPendingWorkout] = useState<{
-    sets: Array<{ exerciseId: string; reps: number }>;
+    sets: Array<{ exerciseId: string; reps: number; duration?: string }>;
     notes: string;
   } | null>(null);
   const [pendingTemplate, setPendingTemplate] = useState<WorkoutTemplate | null>(null);
@@ -67,6 +68,11 @@ function App() {
     const totalSets = workouts.reduce((total, workout) => total + workout.sets.length, 0);
     const totalReps = workouts.reduce((total, workout) => 
       total + workout.sets.reduce((setTotal, set) => setTotal + set.reps, 0), 0
+    );
+    const totalDuration = workouts.reduce((total, workout) => 
+      total + workout.sets.reduce((setTotal, set) => 
+        setTotal + (set.duration ? durationToSeconds(set.duration) : 0), 0
+      ), 0
     );
 
     // Calculate current streak
@@ -126,6 +132,7 @@ function App() {
       totalWorkouts,
       totalSets,
       totalReps,
+      totalDuration,
       currentStreak,
       longestStreak
     };
