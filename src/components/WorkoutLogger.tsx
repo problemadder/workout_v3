@@ -3,6 +3,7 @@ import { Plus, Minus, Save, RotateCcw, BookOpen, Trophy, TrendingUp, Star, X, Se
 import { Exercise, WorkoutSet, Workout, WorkoutTemplate } from '../types';
 import { formatDate, isToday } from '../utils/dateUtils';
 import { getExerciseMaxReps, getExerciseAverageReps } from '../utils/maxRepUtils';
+import DurationInput from './DurationInput';
 
 interface WorkoutLoggerProps {
   exercises: Exercise[];
@@ -13,7 +14,7 @@ interface WorkoutLoggerProps {
   onSaveWorkout: (workout: Omit<Workout, 'id'>) => void;
   onUpdateWorkout: (id: string, workout: Omit<Workout, 'id'>) => void;
   onAddTemplate?: (template: Omit<WorkoutTemplate, 'id' | 'createdAt'>) => void;
-  onWorkoutDataChange?: (sets: Array<{ exerciseId: string; reps: number }>, notes: string) => void;
+  onWorkoutDataChange?: (sets: Array<{ exerciseId: string; reps: number; duration?: string }>, notes: string) => void;
   onTemplateClear?: () => void;
 }
 
@@ -82,7 +83,8 @@ export function WorkoutLogger({
     if (todaysWorkout && !pendingTemplate) {
       setSets(todaysWorkout.sets.map(set => ({
         exerciseId: set.exerciseId,
-        reps: set.reps
+        reps: set.reps,
+        duration: set.duration
       })));
       setNotes(todaysWorkout.notes || '');
     }
@@ -282,6 +284,12 @@ export function WorkoutLogger({
   };
 
   const getPlaceholderText = (exerciseId: string, setPosition: number) => {
+    const exercise = sortedExercises.find(e => e.id === exerciseId);
+    
+    if (exercise?.exerciseType === 'time') {
+      return '00:00';
+    }
+    
     const stats = getStatsForSet(exerciseId, setPosition);
     const parts = [];
 
@@ -482,7 +490,7 @@ export function WorkoutLogger({
           }`}>
             {/* Exercise Header */}
             <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-3 flex-wrap">
                 <h3 className="font-semibold text-solarized-base02 text-lg">
                   {group.exercise?.name || 'Unknown Exercise'}
                 </h3>
@@ -492,7 +500,7 @@ export function WorkoutLogger({
                   </span>
                 )}
               </div>
-              <span className="text-sm text-solarized-base01 bg-solarized-base1/20 px-3 py-1 rounded-full">
+              <span className="text-sm text-solarized-base01 bg-solarized-base1/20 px-3 py-1 rounded-full whitespace-nowrap">
                 {group.sets.length} set{group.sets.length !== 1 ? 's' : ''}
               </span>
             </div>
@@ -501,6 +509,7 @@ export function WorkoutLogger({
             <div className="grid grid-cols-2 gap-2">
               {group.sets.map(({ set, originalIndex, setNumber }) => {
                 const setPosition = getSetPositionForExercise(set.exerciseId, originalIndex);
+                const isTimeExercise = group.exercise?.exerciseType === 'time';
                 
                 return (
                   <div key={originalIndex} className="bg-solarized-base1/10 rounded-lg p-2 border border-solarized-base1/20">
@@ -518,26 +527,35 @@ export function WorkoutLogger({
                       </div>
                     </div>
                     
-                    <input
-                      type="number"
-                      step="1"
-                      value={set.reps || ''}
-                      onChange={(e) => updateSet(originalIndex, 'reps', parseFloat(e.target.value) || 0)}
-                      placeholder={getPlaceholderText(set.exerciseId, setPosition)}
-                      className="w-full p-2 border border-solarized-base1 rounded-lg focus:ring-2 focus:ring-solarized-blue focus:border-transparent text-lg font-bold bg-solarized-base3 text-solarized-base02 placeholder-gray-400 placeholder:text-xs text-center"
-                      min="0"
-                      onKeyDown={(e) => {
-                        if (e.key === 'ArrowUp') {
-                          e.preventDefault();
-                          const currentValue = parseFloat(e.currentTarget.value) || 0;
-                          updateSet(originalIndex, 'reps', currentValue + 1);
-                        } else if (e.key === 'ArrowDown') {
-                          e.preventDefault();
-                          const currentValue = parseFloat(e.currentTarget.value) || 0;
-                          updateSet(originalIndex, 'reps', Math.max(0, currentValue - 1));
-                        }
-                      }}
-                    />
+                    {isTimeExercise ? (
+                      <DurationInput
+                        value={set.duration || ''}
+                        onChange={(value) => updateSet(originalIndex, 'duration', value)}
+                        placeholder={getPlaceholderText(set.exerciseId, setPosition)}
+                        className="text-lg font-bold"
+                      />
+                    ) : (
+                      <input
+                        type="number"
+                        step="1"
+                        value={set.reps || ''}
+                        onChange={(e) => updateSet(originalIndex, 'reps', parseFloat(e.target.value) || 0)}
+                        placeholder={getPlaceholderText(set.exerciseId, setPosition)}
+                        className="w-full p-2 border border-solarized-base1 rounded-lg focus:ring-2 focus:ring-solarized-blue focus:border-transparent text-lg font-bold bg-solarized-base3 text-solarized-base02 placeholder-gray-400 placeholder:text-xs text-center"
+                        min="0"
+                        onKeyDown={(e) => {
+                          if (e.key === 'ArrowUp') {
+                            e.preventDefault();
+                            const currentValue = parseFloat(e.currentTarget.value) || 0;
+                            updateSet(originalIndex, 'reps', currentValue + 1);
+                          } else if (e.key === 'ArrowDown') {
+                            e.preventDefault();
+                            const currentValue = parseFloat(e.currentTarget.value) || 0;
+                            updateSet(originalIndex, 'reps', Math.max(0, currentValue - 1));
+                          }
+                        }}
+                      />
+                    )}
                   </div>
                 );
               })}

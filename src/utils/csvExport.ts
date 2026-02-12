@@ -10,8 +10,10 @@ export function exportWorkoutsToCSV(workouts: Workout[], exercises: Exercise[]):
     'Date',
     'Exercise Name',
     'Exercise Category',
+    'Exercise Type',
     'Set Number',
     'Reps',
+    'Duration',
     'Workout Notes'
   ];
   
@@ -35,8 +37,10 @@ export function exportWorkoutsToCSV(workouts: Workout[], exercises: Exercise[]):
         formattedDate,
         'No exercises',
         '',
+        '',
         '0',
         '0',
+        '',
         workoutNotes
       ]);
     } else {
@@ -47,6 +51,7 @@ export function exportWorkoutsToCSV(workouts: Workout[], exercises: Exercise[]):
         const exercise = exerciseMap.get(set.exerciseId);
         const exerciseName = exercise?.name || 'Unknown Exercise';
         const exerciseCategory = exercise?.category || '';
+        const exerciseType = exercise?.exerciseType || 'reps';
         
         // Track set number for this exercise
         const currentSetNumber = (exerciseSetCounts.get(set.exerciseId) || 0) + 1;
@@ -56,8 +61,10 @@ export function exportWorkoutsToCSV(workouts: Workout[], exercises: Exercise[]):
           formattedDate,
           exerciseName,
           exerciseCategory,
+          exerciseType,
           currentSetNumber.toString(),
           set.reps.toString(),
+          set.duration || '',
           workoutNotes
         ]);
       });
@@ -162,6 +169,7 @@ export function exportExercisesToCSV(exercises: Exercise[]): void {
   const headers = [
     'Name',
     'Category',
+    'Exercise Type',
     'Description',
     'Created Date'
   ];
@@ -180,6 +188,7 @@ export function exportExercisesToCSV(exercises: Exercise[]): void {
     rows.push([
       exercise.name,
       exercise.category,
+      exercise.exerciseType || 'reps',
       exercise.description || '',
       formattedDate
     ]);

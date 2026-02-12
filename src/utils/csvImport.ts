@@ -5,21 +5,24 @@ export interface ExerciseCSVRow {
   name: string;
   description?: string;
   category: Exercise['category'];
+  exerciseType?: 'reps' | 'time';
 }
 
 export interface WorkoutCSVRow {
   date: string;
   exerciseName: string;
   exerciseCategory?: Exercise['category'];
+  exerciseType?: 'reps' | 'time';
   setNumber: string;
   reps: string;
+  duration?: string;
   setNotes?: string;
   workoutNotes?: string;
 }
 
 export interface TargetCSVRow {
   name: string;
-  type: 'sets' | 'reps';
+  type: 'sets' | 'reps' | 'duration';
   category?: Exercise['category'];
   exerciseId?: string;
   targetValue: number;
@@ -89,12 +92,18 @@ export function parseExercisesCSV(csvContent: string): ExerciseCSVRow[] {
   
   const categoryIndex = headers.findIndex(h => 
     h === 'category' || 
-    h === 'type' || 
     h === 'muscle_group' || 
     h.includes('category')
   );
   
-  console.log('Header indices:', { nameIndex, descriptionIndex, categoryIndex });
+  const exerciseTypeIndex = headers.findIndex(h =>
+    h === 'exercisetype' ||
+    h === 'exercise_type' ||
+    h === 'type' ||
+    (h.includes('exercise') && h.includes('type'))
+  );
+  
+  console.log('Header indices:', { nameIndex, descriptionIndex, categoryIndex, exerciseTypeIndex });
   
   if (nameIndex === -1) {
     throw new Error(`CSV must have a "name" column. Found headers: ${headers.join(', ')}`);
@@ -183,12 +192,21 @@ export function parseExercisesCSV(csvContent: string): ExerciseCSVRow[] {
     
     const description = descriptionIndex >= 0 ? values[descriptionIndex]?.trim() : '';
     
-    console.log(`Adding exercise: ${name}, category: ${category}, description: ${description}`);
+    let exerciseType: 'reps' | 'time' = 'reps'; // default
+    if (exerciseTypeIndex >= 0) {
+      const exerciseTypeRaw = values[exerciseTypeIndex]?.trim().toLowerCase();
+      if (exerciseTypeRaw === 'time' || exerciseTypeRaw === 'duration') {
+        exerciseType = 'time';
+      }
+    }
+    
+    console.log(`Adding exercise: ${name}, category: ${category}, exerciseType: ${exerciseType}, description: ${description}`);
     
     exercises.push({
       name,
       description: description || undefined,
-      category
+      category,
+      exerciseType
     });
   }
   
@@ -215,6 +233,11 @@ export function parseWorkoutsCSV(csvContent: string, exercises: Exercise[]): { w
     h === 'exercise_category' || 
     (h.includes('exercise') && h.includes('category'))
   );
+  const exerciseTypeIndex = headers.findIndex(h =>
+    h === 'exercisetype' ||
+    h === 'exercise_type' ||
+    (h.includes('exercise') && h.includes('type'))
+  );
   const setNumberIndex = headers.findIndex(h => 
     h === 'setnumber' || 
     h === 'set_number' || 
@@ -222,6 +245,7 @@ export function parseWorkoutsCSV(csvContent: string, exercises: Exercise[]): { w
     (h.includes('set') && h.includes('number'))
   );
   const repsIndex = headers.findIndex(h => h === 'reps' || h.includes('reps') || h === 'repetitions');
+  const durationIndex = headers.findIndex(h => h === 'duration' || h.includes('duration') || h === 'time');
   const setNotesIndex = headers.findIndex(h => 
     h === 'setnotes' || 
     h === 'set_notes' || 
@@ -239,7 +263,7 @@ export function parseWorkoutsCSV(csvContent: string, exercises: Exercise[]): { w
   if (setNumberIndex === -1) throw new Error('CSV must have a "setNumber" column for proper set position tracking');
   
   const workoutMap = new Map<string, { 
-    sets: Array<{ exerciseId: string; reps: number; notes?: string; setNumber: number; exerciseName: string }>, 
+    sets: Array<{ exerciseId: string; reps: number; duration?: string; notes?: string; setNumber: number; exerciseName: string }>, 
     notes?: string 
   }>();
   const exerciseMap = new Map(exercises.map(ex => [ex.name.toLowerCase(), ex]));
@@ -293,10 +317,19 @@ export function parseWorkoutsCSV(csvContent: string, exercises: Exercise[]): { w
         }
       }
       
+      let exerciseType: 'reps' | 'time' = 'reps'; // default
+      if (exerciseTypeIndex >= 0) {
+        const exerciseTypeRaw = values[exerciseTypeIndex]?.trim().toLowerCase();
+        if (exerciseTypeRaw === 'time' || exerciseTypeRaw === 'duration') {
+          exerciseType = 'time';
+        }
+      }
+      
       exercise = {
         id: crypto.randomUUID(),
         name: exerciseName,
         category,
+        exerciseType,
         createdAt: new Date()
       };
       
@@ -304,10 +337,14 @@ export function parseWorkoutsCSV(csvContent: string, exercises: Exercise[]): { w
       newExercises.push(exercise);
     }
     
+    // Parse duration if present
+    const duration = durationIndex >= 0 ? values[durationIndex]?.trim() : undefined;
+    
     // Create workout set with set number tracking
     const set = {
       exerciseId: exercise.id,
       reps,
+      duration: duration || undefined,
       notes: setNotesIndex >= 0 ? values[setNotesIndex]?.trim() : undefined,
       setNumber,
       exerciseName
@@ -351,6 +388,7 @@ export function parseWorkoutsCSV(csvContent: string, exercises: Exercise[]): { w
         orderedSets.push({
           exerciseId: set.exerciseId,
           reps: set.reps,
+          duration: set.duration,
           notes: set.notes
         });
       });
