@@ -57,6 +57,7 @@ export function ImportExport({ exercises, workouts, targets, onImportExercises, 
           name: ex.name,
           description: ex.description,
           category: ex.category,
+          exerciseType: ex.exerciseType ?? 'reps',
           createdAt: new Date()
         }));
 

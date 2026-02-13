@@ -3,7 +3,7 @@ import { TrendingUp, Target, Calendar, Percent, Dumbbell, BarChart3, Activity, L
 import { Workout, Exercise } from '../types';
 import { formatShortDate } from '../utils/dateUtils';
 import { formatSingleDecimal } from '../utils/formatUtils';
-import { sumDurations, secondsToDuration, durationToSeconds } from '../utils/durationUtils';
+import { formatDurationDisplay, sumDurations, secondsToDuration, durationToSeconds } from '../utils/durationUtils';
 import { PieChart } from './PieChart';
 import { BarChart } from './BarChart';
 import { ExerciseConsistencyChart } from './ExerciseConsistencyChart';
@@ -128,7 +128,7 @@ export function Stats({ workouts, exercises }: StatsProps) {
         currentYear: {
           year: currentYear,
           totalValue: currentYearTotal,
-          totalDisplay: secondsToDuration(currentYearTotal),
+          totalDisplay: formatDurationDisplay(currentYearTotal),
           workoutDays: currentYearWorkoutDays,
           dailyAverage: currentYearDailyAvg,
           perDay: currentYearPerDay,
@@ -138,7 +138,7 @@ export function Stats({ workouts, exercises }: StatsProps) {
         lastYear: {
           year: lastYear,
           totalValue: lastYearTotal,
-          totalDisplay: secondsToDuration(lastYearTotal),
+          totalDisplay: formatDurationDisplay(lastYearTotal),
           workoutDays: lastYearWorkoutDays,
           dailyAverage: lastYearDailyAvg,
           perDay: lastYearPerDay,
@@ -148,8 +148,8 @@ export function Stats({ workouts, exercises }: StatsProps) {
       };
     } else {
       // For reps exercises, use existing logic
-      currentYearTotal = currentYearSets.reduce((total, set) => total + set.reps, 0);
-      lastYearTotal = lastYearSets.reduce((total, set) => total + set.reps, 0);
+      currentYearTotal = currentYearSets.reduce((total, set) => total + (set.reps ?? 0), 0);
+      lastYearTotal = lastYearSets.reduce((total, set) => total + (set.reps ?? 0), 0);
       
       const currentYearWorkoutDays = new Set(
         currentYearWorkouts
@@ -214,7 +214,7 @@ export function Stats({ workouts, exercises }: StatsProps) {
       return {
         date,
         sets: workout?.sets.length || 0,
-        reps: workout?.sets.reduce((total, set) => total + set.reps, 0) || 0
+        reps: workout?.sets.reduce((total, set) => total + (set.reps ?? 0), 0) || 0
       };
     });
   };
@@ -518,10 +518,10 @@ export function Stats({ workouts, exercises }: StatsProps) {
             // For time exercises, sum durations in seconds
             const durations = exerciseSets.map(set => set.duration || '00:00');
             volume = sumDurations(durations);
-            display = secondsToDuration(volume);
+            display = formatDurationDisplay(volume);
           } else {
             // For reps exercises, sum reps
-            volume = exerciseSets.reduce((total, set) => total + set.reps, 0);
+            volume = exerciseSets.reduce((total, set) => total + (set.reps ?? 0), 0);
             display = volume.toString();
           }
           
@@ -783,8 +783,8 @@ export function Stats({ workouts, exercises }: StatsProps) {
               maxSet = exerciseSets.find(set => durationToSeconds(set.duration || '00:00') === workoutMax);
             } else {
               // For reps exercises, find max reps
-              workoutMax = Math.max(...exerciseSets.map(set => set.reps));
-              maxSet = exerciseSets.find(set => set.reps === workoutMax);
+              workoutMax = Math.max(...exerciseSets.map(set => set.reps ?? 0));
+              maxSet = exerciseSets.find(set => (set.reps ?? 0) === workoutMax);
             }
             
             if (workoutMax > runningMax) {
@@ -1017,7 +1017,7 @@ export function Stats({ workouts, exercises }: StatsProps) {
             }, 0);
             
             const hasTimeExercises = totalDurationSeconds > 0;
-            const durationDisplay = secondsToDuration(totalDurationSeconds);
+            const durationDisplay = formatDurationDisplay(totalDurationSeconds);
             
             return (
               <div key={index} className="flex items-center gap-3">
@@ -1213,7 +1213,7 @@ export function Stats({ workouts, exercises }: StatsProps) {
                   }`}>
                     {exerciseComparison.currentYear.totalValue >= exerciseComparison.lastYear.totalValue ? '+' : ''}
                     {isTimeExercise 
-                      ? secondsToDuration(exerciseComparison.currentYear.totalValue - exerciseComparison.lastYear.totalValue)
+                      ? `${exerciseComparison.currentYear.totalValue - exerciseComparison.lastYear.totalValue < 0 ? '-' : ''}${formatDurationDisplay(Math.abs(exerciseComparison.currentYear.totalValue - exerciseComparison.lastYear.totalValue))}`
                       : exerciseComparison.currentYear.totalValue - exerciseComparison.lastYear.totalValue
                     }
                   </span>

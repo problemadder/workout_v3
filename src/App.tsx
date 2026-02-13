@@ -21,7 +21,7 @@ function App() {
   const [templates, setTemplates] = useLocalStorage<WorkoutTemplate[]>('abs-templates', []);
   const [targets, setTargets] = useLocalStorage<WorkoutTarget[]>('abs-targets', []);
   const [pendingWorkout, setPendingWorkout] = useState<{
-    sets: Array<{ exerciseId: string; reps: number; duration?: string }>;
+    sets: Array<{ exerciseId: string; reps?: number; duration?: string }>;
     notes: string;
   } | null>(null);
   const [pendingTemplate, setPendingTemplate] = useState<WorkoutTemplate | null>(null);
@@ -38,6 +38,15 @@ function App() {
       setExercises(initialExercises);
     }
   }, [exercises.length, setExercises]);
+
+  useEffect(() => {
+    if (exercises.some(exercise => !exercise.exerciseType)) {
+      setExercises(exercises.map(exercise => ({
+        ...exercise,
+        exerciseType: exercise.exerciseType ?? 'reps'
+      })));
+    }
+  }, [exercises, setExercises]);
 
   // Restore draft workout on app load
   useEffect(() => {
@@ -67,7 +76,7 @@ function App() {
     const totalWorkouts = workouts.length;
     const totalSets = workouts.reduce((total, workout) => total + workout.sets.length, 0);
     const totalReps = workouts.reduce((total, workout) => 
-      total + workout.sets.reduce((setTotal, set) => setTotal + set.reps, 0), 0
+      total + workout.sets.reduce((setTotal, set) => setTotal + (set.reps ?? 0), 0), 0
     );
     const totalDuration = workouts.reduce((total, workout) => 
       total + workout.sets.reduce((setTotal, set) => 
@@ -331,7 +340,7 @@ function App() {
     setActiveTab(newTab);
   };
 
-  const handleWorkoutDataChange = (sets: Array<{ exerciseId: string; reps: number }>, notes: string) => {
+  const handleWorkoutDataChange = (sets: Array<{ exerciseId: string; reps?: number; duration?: string }>, notes: string) => {
     setPendingWorkout({ sets, notes });
 
     // Debounced auto-save to localStorage
