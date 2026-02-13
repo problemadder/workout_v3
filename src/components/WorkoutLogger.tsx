@@ -3,6 +3,7 @@ import { Plus, Minus, Save, RotateCcw, BookOpen, Trophy, TrendingUp, Star, X, Se
 import { Exercise, WorkoutSet, Workout, WorkoutTemplate } from '../types';
 import { formatDate, isToday } from '../utils/dateUtils';
 import { getExerciseMaxReps, getExerciseAverageReps } from '../utils/maxRepUtils';
+import { durationToSeconds, secondsToDuration } from '../utils/durationUtils';
 import DurationInput from './DurationInput';
 
 interface WorkoutLoggerProps {
@@ -14,7 +15,7 @@ interface WorkoutLoggerProps {
   onSaveWorkout: (workout: Omit<Workout, 'id'>) => void;
   onUpdateWorkout: (id: string, workout: Omit<Workout, 'id'>) => void;
   onAddTemplate?: (template: Omit<WorkoutTemplate, 'id' | 'createdAt'>) => void;
-  onWorkoutDataChange?: (sets: Array<{ exerciseId: string; reps: number; duration?: string }>, notes: string) => void;
+  onWorkoutDataChange?: (sets: Array<{ exerciseId: string; reps?: number; duration?: string }>, notes: string) => void;
   onTemplateClear?: () => void;
 }
 
@@ -55,16 +56,18 @@ export function WorkoutLogger({
   // Sort exercises alphabetically
   const sortedExercises = [...exercises].sort((a, b) => a.name.localeCompare(b.name));
 
+  const createSetForExercise = (exerciseId: string) => {
+    const exercise = exercises.find(item => item.id === exerciseId);
+    return exercise?.exerciseType === 'time' ? { exerciseId } : { exerciseId, reps: 0 };
+  };
+
   // Load template when pendingTemplate is set (takes priority)
   useEffect(() => {
     if (pendingTemplate) {
       const templateSets: Omit<WorkoutSet, 'id'>[] = [];
       pendingTemplate.exercises.forEach(templateExercise => {
         for (let i = 0; i < templateExercise.sets; i++) {
-          templateSets.push({
-            exerciseId: templateExercise.exerciseId,
-            reps: 0 // Start with 0 reps to show placeholder
-          });
+          templateSets.push(createSetForExercise(templateExercise.exerciseId));
         }
       });
       
@@ -76,7 +79,7 @@ export function WorkoutLogger({
         onTemplateClear();
       }
     }
-  }, [pendingTemplate, onTemplateClear]);
+  }, [pendingTemplate, onTemplateClear, exercises]);
 
   useEffect(() => {
     // Only load today's workout if there's no pending template
@@ -108,7 +111,7 @@ export function WorkoutLogger({
     
     const newSets: Omit<WorkoutSet, 'id'>[] = [];
     for (let i = 0; i < numberOfSets; i++) {
-      newSets.push({ exerciseId: selectedExerciseId, reps: 0 }); // Start with 0 reps to show placeholder
+      newSets.push(createSetForExercise(selectedExerciseId));
     }
     
     setSets([...sets, ...newSets]);
@@ -129,7 +132,7 @@ export function WorkoutLogger({
       
       // Insert the new set right after the last set of this exercise
       const newSets = [...sets];
-      newSets.splice(lastIndex + 1, 0, { exerciseId, reps: 0 });
+      newSets.splice(lastIndex + 1, 0, createSetForExercise(exerciseId));
       setSets(newSets);
     } else {
       // Fallback for when no specific exercise is provided
@@ -137,7 +140,7 @@ export function WorkoutLogger({
         ? sortedExercises.find(e => e.category === selectedCategory)?.id 
         : sortedExercises[0]?.id) || '';
       
-      setSets([...sets, { exerciseId: defaultExerciseId, reps: 0 }]);
+      setSets([...sets, createSetForExercise(defaultExerciseId)]);
     }
   };
 
@@ -183,10 +186,7 @@ export function WorkoutLogger({
     const templateSets: Omit<WorkoutSet, 'id'>[] = [];
     template.exercises.forEach(templateExercise => {
       for (let i = 0; i < templateExercise.sets; i++) {
-        templateSets.push({
-          exerciseId: templateExercise.exerciseId,
-          reps: 0 // Start with 0 reps to show placeholder
-        });
+        templateSets.push(createSetForExercise(templateExercise.exerciseId));
       }
     });
     
@@ -228,6 +228,36 @@ export function WorkoutLogger({
     return {
       max: threeMonthMaxRecord?.maxReps || 0,
       average: threeMonthAvgRecord?.averageReps || 0
+    };
+  };
+
+  const getDurationStatsForSet = (exerciseId: string, setPosition: number) => {
+    const cutoffDate = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000);
+    const durations: number[] = [];
+
+    workouts.forEach(workout => {
+      if (new Date(workout.date) < cutoffDate) return;
+
+      const exerciseSets = workout.sets
+        .filter(set => set.exerciseId === exerciseId)
+        .map((set, index) => ({ ...set, position: index + 1 }));
+
+      const setAtPosition = exerciseSets.find(set => set.position === setPosition);
+      if (setAtPosition?.duration) {
+        durations.push(durationToSeconds(setAtPosition.duration));
+      }
+    });
+
+    if (durations.length === 0) {
+      return { max: 0, average: 0 };
+    }
+
+    const totalSeconds = durations.reduce((total, value) => total + value, 0);
+    const average = Math.round(totalSeconds / durations.length);
+
+    return {
+      max: Math.max(...durations),
+      average
     };
   };
 
@@ -510,6 +540,8 @@ export function WorkoutLogger({
               {group.sets.map(({ set, originalIndex, setNumber }) => {
                 const setPosition = getSetPositionForExercise(set.exerciseId, originalIndex);
                 const isTimeExercise = group.exercise?.exerciseType === 'time';
+                const durationStats = isTimeExercise ? getDurationStatsForSet(set.exerciseId, setPosition) : null;
+                const hasDurationStats = durationStats ? durationStats.max > 0 || durationStats.average > 0 : false;
                 
                 return (
                   <div key={originalIndex} className="bg-solarized-base1/10 rounded-lg p-2 border border-solarized-base1/20">
@@ -528,17 +560,24 @@ export function WorkoutLogger({
                     </div>
                     
                     {isTimeExercise ? (
-                      <DurationInput
-                        value={set.duration || ''}
-                        onChange={(value) => updateSet(originalIndex, 'duration', value)}
-                        placeholder={getPlaceholderText(set.exerciseId, setPosition)}
-                        className="text-lg font-bold"
-                      />
+                      <div className="space-y-1">
+                        <DurationInput
+                          value={set.duration || ''}
+                          onChange={(value) => updateSet(originalIndex, 'duration', value)}
+                          placeholder="00:00"
+                          className="text-lg font-bold"
+                        />
+                        {hasDurationStats && durationStats && (
+                          <div className="text-[10px] text-solarized-base01 text-center">
+                            Max {secondsToDuration(durationStats.max)} • Avg {secondsToDuration(durationStats.average)}
+                          </div>
+                        )}
+                      </div>
                     ) : (
                       <input
                         type="number"
                         step="1"
-                        value={set.reps || ''}
+                        value={set.reps ?? ''}
                         onChange={(e) => updateSet(originalIndex, 'reps', parseFloat(e.target.value) || 0)}
                         placeholder={getPlaceholderText(set.exerciseId, setPosition)}
                         className="w-full p-2 border border-solarized-base1 rounded-lg focus:ring-2 focus:ring-solarized-blue focus:border-transparent text-lg font-bold bg-solarized-base3 text-solarized-base02 placeholder-gray-400 placeholder:text-xs text-center"

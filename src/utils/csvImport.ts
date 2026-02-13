@@ -1,5 +1,6 @@
 import { Exercise, Workout, WorkoutSet } from '../types';
 import { WorkoutTarget } from '../types';
+import { parseDurationInput, validateDuration } from './durationUtils';
 
 export interface ExerciseCSVRow {
   name: string;
@@ -263,7 +264,7 @@ export function parseWorkoutsCSV(csvContent: string, exercises: Exercise[]): { w
   if (setNumberIndex === -1) throw new Error('CSV must have a "setNumber" column for proper set position tracking');
   
   const workoutMap = new Map<string, { 
-    sets: Array<{ exerciseId: string; reps: number; duration?: string; notes?: string; setNumber: number; exerciseName: string }>, 
+    sets: Array<{ exerciseId: string; reps?: number; duration?: string; notes?: string; setNumber: number; exerciseName: string }>, 
     notes?: string 
   }>();
   const exerciseMap = new Map(exercises.map(ex => [ex.name.toLowerCase(), ex]));
@@ -281,7 +282,7 @@ export function parseWorkoutsCSV(csvContent: string, exercises: Exercise[]): { w
     const repsStr = values[repsIndex]?.trim();
     const setNumberStr = values[setNumberIndex]?.trim();
     
-    if (!dateStr || !exerciseName || !repsStr || !setNumberStr) continue; // Skip incomplete rows
+    if (!dateStr || !exerciseName || !setNumberStr) continue; // Skip incomplete rows
     
     // Parse date
     let date: Date;
@@ -292,14 +293,17 @@ export function parseWorkoutsCSV(csvContent: string, exercises: Exercise[]): { w
       throw new Error(`Invalid date "${dateStr}" on line ${i + 1}`);
     }
     
-    // Parse reps
-    const reps = parseInt(repsStr);
-    if (isNaN(reps) || reps < 0) {
-      throw new Error(`Invalid reps "${repsStr}" on line ${i + 1}`);
+    // Parse reps (optional for time exercises)
+    let reps = 0;
+    if (repsStr) {
+      reps = parseInt(repsStr, 10);
+      if (isNaN(reps) || reps < 0) {
+        throw new Error(`Invalid reps "${repsStr}" on line ${i + 1}`);
+      }
     }
     
     // Parse set number
-    const setNumber = parseInt(setNumberStr);
+    const setNumber = parseInt(setNumberStr, 10);
     if (isNaN(setNumber) || setNumber < 1) {
       throw new Error(`Invalid set number "${setNumberStr}" on line ${i + 1}. Set number must be 1 or greater.`);
     }
@@ -336,15 +340,27 @@ export function parseWorkoutsCSV(csvContent: string, exercises: Exercise[]): { w
       exerciseMap.set(exerciseName.toLowerCase(), exercise);
       newExercises.push(exercise);
     }
-    
+
+    const exerciseType = exercise.exerciseType ?? 'reps';
+
     // Parse duration if present
-    const duration = durationIndex >= 0 ? values[durationIndex]?.trim() : undefined;
+    let duration: string | undefined;
+    if (durationIndex >= 0) {
+      const durationRaw = values[durationIndex]?.trim();
+      if (durationRaw) {
+        const parsedDuration = parseDurationInput(durationRaw);
+        if (!parsedDuration || !validateDuration(parsedDuration)) {
+          throw new Error(`Invalid duration "${durationRaw}" on line ${i + 1}`);
+        }
+        duration = parsedDuration;
+      }
+    }
     
     // Create workout set with set number tracking
     const set = {
       exerciseId: exercise.id,
-      reps,
-      duration: duration || undefined,
+      reps: exerciseType === 'time' ? undefined : reps,
+      duration: exerciseType === 'time' ? duration : undefined,
       notes: setNotesIndex >= 0 ? values[setNotesIndex]?.trim() : undefined,
       setNumber,
       exerciseName
@@ -406,12 +422,12 @@ export function parseWorkoutsCSV(csvContent: string, exercises: Exercise[]): { w
 }
 
 export function generateExerciseCSVTemplate(): string {
-  const headers = ['name', 'category', 'description'];
+  const headers = ['name', 'category', 'exerciseType', 'description'];
   const examples = [
-    ['Push-ups', 'arms', 'Standard push-ups for chest and arms'],
-    ['Squats', 'legs', 'Bodyweight squats for legs'],
-    ['Plank', 'abs', 'Core stability exercise'],
-    ['Pull-ups', 'back', 'Upper body pulling exercise']
+    ['Push-ups', 'arms', 'reps', 'Standard push-ups for chest and arms'],
+    ['Squats', 'legs', 'reps', 'Bodyweight squats for legs'],
+    ['Plank', 'abs', 'time', 'Core stability exercise'],
+    ['Pull-ups', 'back', 'reps', 'Upper body pulling exercise']
   ];
   
   const csvContent = [
@@ -423,15 +439,15 @@ export function generateExerciseCSVTemplate(): string {
 }
 
 export function generateWorkoutCSVTemplate(): string {
-  const headers = ['date', 'exerciseName', 'exerciseCategory', 'setNumber', 'reps', 'setNotes', 'workoutNotes'];
+  const headers = ['date', 'exerciseName', 'exerciseCategory', 'exerciseType', 'setNumber', 'reps', 'duration', 'setNotes', 'workoutNotes'];
   const examples = [
-    ['2024-01-15', 'Push-ups', 'arms', '1', '15', 'Felt strong', 'Great morning workout'],
-    ['2024-01-15', 'Push-ups', 'arms', '2', '12', 'Getting tired', 'Great morning workout'],
-    ['2024-01-15', 'Push-ups', 'arms', '3', '10', 'Final set', 'Great morning workout'],
-    ['2024-01-15', 'Squats', 'legs', '1', '20', 'Good form', 'Great morning workout'],
-    ['2024-01-15', 'Squats', 'legs', '2', '18', 'Legs burning', 'Great morning workout'],
-    ['2024-01-16', 'Plank', 'abs', '1', '30', 'Held for 30 seconds', 'Quick abs session'],
-    ['2024-01-16', 'Plank', 'abs', '2', '25', 'Shorter hold', 'Quick abs session']
+    ['2024-01-15', 'Push-ups', 'arms', 'reps', '1', '15', '', 'Felt strong', 'Great morning workout'],
+    ['2024-01-15', 'Push-ups', 'arms', 'reps', '2', '12', '', 'Getting tired', 'Great morning workout'],
+    ['2024-01-15', 'Push-ups', 'arms', 'reps', '3', '10', '', 'Final set', 'Great morning workout'],
+    ['2024-01-15', 'Squats', 'legs', 'reps', '1', '20', '', 'Good form', 'Great morning workout'],
+    ['2024-01-15', 'Squats', 'legs', 'reps', '2', '18', '', 'Legs burning', 'Great morning workout'],
+    ['2024-01-16', 'Plank', 'abs', 'time', '1', '', '00:30', 'Held for 30 seconds', 'Quick abs session'],
+    ['2024-01-16', 'Plank', 'abs', 'time', '2', '', '00:25', 'Shorter hold', 'Quick abs session']
   ];
   
   const csvContent = [
@@ -480,7 +496,7 @@ export function parseTargetsCSV(csvContent: string, exercises: Exercise[]): Targ
   
   const exerciseMap = new Map(exercises.map(ex => [ex.name.toLowerCase(), ex]));
   const validCategories: Exercise['category'][] = ['abs', 'legs', 'arms', 'back', 'shoulders', 'chest', 'cardio', 'full-body'];
-  const validTypes: ('sets' | 'reps')[] = ['sets', 'reps'];
+  const validTypes: ('sets' | 'reps' | 'duration')[] = ['sets', 'reps', 'duration'];
   const validPeriods: ('weekly' | 'monthly' | 'yearly')[] = ['weekly', 'monthly', 'yearly'];
   
   for (let i = 1; i < lines.length; i++) {
@@ -497,7 +513,7 @@ export function parseTargetsCSV(csvContent: string, exercises: Exercise[]): Targ
       console.warn(`Invalid type "${typeRaw}" on line ${i + 1}, skipping`);
       continue;
     }
-    const type = typeRaw as 'sets' | 'reps';
+    const type = typeRaw as 'sets' | 'reps' | 'duration';
     
     const targetValueRaw = values[targetValueIndex]?.trim();
     const targetValue = parseInt(targetValueRaw);

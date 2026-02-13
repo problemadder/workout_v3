@@ -140,7 +140,7 @@ export function Targets({ targets, exercises, workouts, onAddTarget, onEditTarge
             if (target.type === 'sets') {
               currentValue += 1;
             } else if (target.type === 'reps') {
-              currentValue += set.reps;
+              currentValue += set.reps ?? 0;
             } else if (target.type === 'duration' && set.duration) {
               currentValue += durationToSeconds(set.duration);
             }
@@ -156,7 +156,7 @@ export function Targets({ targets, exercises, workouts, onAddTarget, onEditTarge
             if (target.type === 'sets') {
               currentValue += 1;
             } else if (target.type === 'reps') {
-              currentValue += set.reps;
+              currentValue += set.reps ?? 0;
             } else if (target.type === 'duration' && set.duration) {
               currentValue += durationToSeconds(set.duration);
             }

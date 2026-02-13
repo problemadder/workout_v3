@@ -18,11 +18,13 @@ export function calculateMaxReps(workouts: Workout[], exerciseId: string, setPos
     // Find the set at the specific position
     const setAtPosition = exerciseSets.find(set => set.position === setPosition);
     
-    if (setAtPosition && (!maxRecord || setAtPosition.reps > maxRecord.maxReps)) {
+    const reps = setAtPosition?.reps ?? 0;
+
+    if (setAtPosition && (!maxRecord || reps > maxRecord.maxReps)) {
       maxRecord = {
         exerciseId,
         setPosition,
-        maxReps: setAtPosition.reps,
+        maxReps: reps,
         date: new Date(workout.date)
       };
     }
@@ -51,7 +53,7 @@ export function calculateAverageReps(workouts: Workout[], exerciseId: string, se
     const setAtPosition = exerciseSets.find(set => set.position === setPosition);
     
     if (setAtPosition) {
-      totalReps += setAtPosition.reps;
+      totalReps += setAtPosition.reps ?? 0;
       totalSets++;
     }
   });

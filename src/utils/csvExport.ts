@@ -51,7 +51,9 @@ export function exportWorkoutsToCSV(workouts: Workout[], exercises: Exercise[]):
         const exercise = exerciseMap.get(set.exerciseId);
         const exerciseName = exercise?.name || 'Unknown Exercise';
         const exerciseCategory = exercise?.category || '';
-        const exerciseType = exercise?.exerciseType || 'reps';
+        const exerciseType = exercise?.exerciseType ?? 'reps';
+        const repsValue = exerciseType === 'time' ? '' : (set.reps ?? 0).toString();
+        const durationValue = exerciseType === 'time' ? (set.duration || '00:00') : (set.duration || '');
         
         // Track set number for this exercise
         const currentSetNumber = (exerciseSetCounts.get(set.exerciseId) || 0) + 1;
@@ -63,8 +65,8 @@ export function exportWorkoutsToCSV(workouts: Workout[], exercises: Exercise[]):
           exerciseCategory,
           exerciseType,
           currentSetNumber.toString(),
-          set.reps.toString(),
-          set.duration || '',
+          repsValue,
+          durationValue,
           workoutNotes
         ]);
       });
@@ -120,7 +122,7 @@ export function exportSummaryToCSV(workouts: Workout[], exercises: Exercise[]): 
     const workoutDate = new Date(workout.date);
     const formattedDate = `${workoutDate.getFullYear()}-${String(workoutDate.getMonth() + 1).padStart(2, '0')}-${String(workoutDate.getDate()).padStart(2, '0')}`;
     const totalSets = workout.sets.length;
-    const totalReps = workout.sets.reduce((sum, set) => sum + set.reps, 0);
+    const totalReps = workout.sets.reduce((sum, set) => sum + (set.reps ?? 0), 0);
     
     // Get unique exercises and muscle groups used in this workout
     const uniqueExercises = [...new Set(workout.sets.map(set => set.exerciseId))]

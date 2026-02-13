@@ -1,12 +1,12 @@
 export interface DraftWorkout {
-  sets: Array<{ exerciseId: string; reps: number; id?: string }>;
+  sets: Array<{ exerciseId: string; reps?: number; duration?: string; id?: string }>;
   notes: string;
   savedAt: number;
 }
 
 const DRAFT_WORKOUT_KEY = 'abs-draft-workout';
 
-export function saveDraftWorkout(sets: Array<{ exerciseId: string; reps: number }>, notes: string): void {
+export function saveDraftWorkout(sets: Array<{ exerciseId: string; reps?: number; duration?: string }>, notes: string): void {
   try {
     const draft: DraftWorkout = {
       sets,

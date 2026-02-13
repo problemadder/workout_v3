@@ -3,14 +3,14 @@ export interface Exercise {
   name: string;
   description?: string;
   category: 'abs' | 'legs' | 'arms' | 'back' | 'shoulders' | 'chest' | 'cardio' | 'full-body';
-  exerciseType?: 'reps' | 'time';
+  exerciseType: 'reps' | 'time';
   createdAt: Date;
 }
 
 export interface WorkoutSet {
   id: string;
   exerciseId: string;
-  reps: number;
+  reps?: number;
   duration?: string;
   notes?: string;
 }

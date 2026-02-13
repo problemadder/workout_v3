@@ -2,7 +2,7 @@ import React from 'react';
 import { Calendar, Target, TrendingUp, Percent, Play, Clock, Hash } from 'lucide-react';
 import { Workout, WorkoutStats, Exercise } from '../types';
 import { formatDate, isToday, getDaysAgo } from '../utils/dateUtils';
-import { sumDurations, secondsToDuration } from '../utils/durationUtils';
+import { formatDurationDisplay, sumDurations } from '../utils/durationUtils';
 
 interface DashboardProps {
   workouts: Workout[];
@@ -196,8 +196,8 @@ export function Dashboard({ workouts, stats, onStartWorkout, onUseWorkout, exerc
                       };
                     }
                     groups[exerciseId].count++;
-                    groups[exerciseId].totalReps += set.reps;
-                    if (set.duration) {
+                    groups[exerciseId].totalReps += set.reps ?? 0;
+
                       groups[exerciseId].durations.push(set.duration);
                     }
                     return groups;
@@ -234,7 +234,7 @@ export function Dashboard({ workouts, stats, onStartWorkout, onUseWorkout, exerc
                         {groupedExercises.map((group, index) => {
                           const isTimeExercise = group.exercise?.exerciseType === 'time';
                           const totalDuration = group.durations.length > 0 
-                            ? secondsToDuration(sumDurations(group.durations))
+                            ? formatDurationDisplay(sumDurations(group.durations))
                             : '00:00';
                           
                           return (
